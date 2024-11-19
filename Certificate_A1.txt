@@ -1,0 +1,6 @@
+Certificate of Attendance
+-------------------------
+Certificate ID: CA1
+Attendee ID: A1
+Conference: GAF-AI 2025
+Issued On: 2024-11-19
