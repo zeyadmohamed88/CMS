@@ -2,23 +2,25 @@ package conference;
 
 public class Main {
     public static void main(String[] args) {
-        // Initialize the conference
-        Conference conference = new Conference("GAF-AI 2025", "2025-06-01", "2025-06-07");
+        // Create some attendees and sessions
+        Attendee attendee1 = new Attendee("John Doe", "john@example.com");
+        Attendee attendee2 = new Attendee("Jane Smith", "jane@example.com");
+        Session session1 = new Session("AI in Healthcare", "2025-05-10", "10:00", "Room 101");
 
-        // Register attendees
-        Attendee attendee1 = new Attendee("Dr. Abram", "abram@example.com");
-        Attendee attendee2 = new Attendee("Dr. Jane", "jane@example.com");
+        // Register attendees and open session
+        Conference conference = new Conference("GAF-AI 2025", "2025-05-01", "2025-05-05");
         conference.registerAttendee(attendee1);
         conference.registerAttendee(attendee2);
-
-        // Add a new session (triggers notifications for all attendees)
-        Session session1 = new Session("Introduction to LLMs", "2025-06-02", "10:00 AM", "Room 101");
         conference.openNewSession(session1);
 
-        // Add a session to an attendee's schedule (triggers notification for the attendee)
-        conference.addSessionToAttendeeSchedule(attendee1, session1);
+        // Mark attendance for the session
+        attendee1.markAttendance(session1);  // John Doe attends
+        attendee2.markAttendance(session1);  // Jane Smith attends
 
-        // Remove a session from an attendee's schedule (triggers notification for the attendee)
-        conference.removeSessionFromAttendeeSchedule(attendee1, session1);
+        // Check attendance in the session
+        System.out.println("Attendees for session: " + session1.getSessionName());
+        for (Attendee attendee : session1.getAttendeesList()) {
+            System.out.println(attendee.getName());
+        }
     }
 }

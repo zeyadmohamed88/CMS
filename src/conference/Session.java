@@ -1,6 +1,8 @@
 package conference;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Session implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -10,6 +12,7 @@ public class Session implements Serializable {
     private String time;
     private String room;
     private Speaker speaker;
+    private List<Attendee> attendeesList;  // New list to track attendees
 
     // Constructor
     public Session(String sessionName, String sessionDate, String time, String room) {
@@ -17,6 +20,7 @@ public class Session implements Serializable {
         this.sessionDate = sessionDate;
         this.time = time;
         this.room = room;
+        this.attendeesList = new ArrayList<>();  // Initialize the attendees list
     }
 
     // Getters and setters
@@ -50,6 +54,21 @@ public class Session implements Serializable {
 
     public void setSpeaker(Speaker speaker) {
         this.speaker = speaker;
+    }
+
+    // Method to mark attendance for an attendee
+    public void markAttendance(Attendee attendee) {
+        if (!attendeesList.contains(attendee)) {
+            attendeesList.add(attendee);
+            System.out.println("Attendance marked for: " + attendee.getName());
+        } else {
+            System.out.println("Attendee " + attendee.getName() + " is already marked as present.");
+        }
+    }
+
+    // Method to get the list of attendees
+    public List<Attendee> getAttendeesList() {
+        return attendeesList;
     }
 
     @Override
