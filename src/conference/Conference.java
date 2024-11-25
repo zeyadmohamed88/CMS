@@ -95,12 +95,39 @@ public class Conference {
         System.out.println("Notification for " + attendee.getName() + ": " + message);
     }
 
+
+
     // Notify all attendees
     private void notifyAllAttendees(String message) {
         for (Attendee attendee : listOfAttendees) {
             notifyAttendee(attendee, message);
         }
     }
+
+    public void markAttendanceForSession(Session session) {
+        for (Attendee attendee : listOfAttendees) {
+            if (attendee.getSchedule().getSessionsList().contains(session)) {
+                attendee.markAttendance(session);
+            }
+        }
+    }
+
+    // Generate certificates for all attendees
+    public void generateCertificates() {
+        System.out.println("Generating certificates...");
+
+        for (Attendee attendee : listOfAttendees) {
+            if (!attendee.getSchedule().getSessionsList().isEmpty()) {  // Check if the attendee has attended any sessions
+                Certificate certificate = new Certificate();
+                certificate.setCertificateID("C" + (listOfAttendees.indexOf(attendee) + 1));
+                certificate.setAttendeeID(attendee.getAttendeeID());
+                certificate.setConferenceName(this.conferenceName);
+                certificate.setIssueDate(this.endDate); // Using the end date as issue date
+                certificate.generateCertificate();  // Generate the certificate
+            }
+        }
+    }
+
 
     // Search for an attendee by ID
     public Attendee searchAttendeeByID(String attendeeID) {

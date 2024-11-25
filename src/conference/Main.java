@@ -17,10 +17,7 @@ public class Main {
         attendee1.markAttendance(session1);  // John Doe attends
         attendee2.markAttendance(session1);  // Jane Smith attends
 
-        // Check attendance in the session
-        System.out.println("Attendees for session: " + session1.getSessionName());
-        for (Attendee attendee : session1.getAttendeesList()) {
-            System.out.println(attendee.getName());
-        }
+        // Generate certificates for all attendees who attended at least one session
+        conference.generateCertificates();  // This will generate certificates for John and Jane
     }
 }
