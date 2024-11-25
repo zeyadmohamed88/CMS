@@ -1,4 +1,6 @@
 package conference;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -17,7 +19,23 @@ public class Main {
         attendee1.markAttendance(session1);  // John Doe attends
         attendee2.markAttendance(session1);  // Jane Smith attends
 
-        // Generate certificates for all attendees who attended at least one session
-        conference.generateCertificates();  // This will generate certificates for John and Jane
+        // Collect feedback for the session
+        conference.collectFeedback("A1", "S1", "Great session on AI applications in healthcare!", 5);  // John Doe's feedback
+        conference.collectFeedback("A2", "S1", "Very informative, but a bit too technical.", 4);  // Jane Smith's feedback
+
+        // Get feedback for session
+        List<Feedback> sessionFeedback = conference.getFeedbackForSession("S1");
+        System.out.println("\nFeedback for session AI in Healthcare:");
+        for (Feedback feedback : sessionFeedback) {
+            System.out.println(feedback);
+        }
+
+        // Get feedback for an attendee
+        List<Feedback> attendee1Feedback = conference.getFeedbackForAttendee("A1");
+        System.out.println("\nFeedback by John Doe:");
+        for (Feedback feedback : attendee1Feedback) {
+            System.out.println(feedback);
+        }
     }
 }
+

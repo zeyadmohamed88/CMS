@@ -11,6 +11,7 @@ public class Conference {
     private List<Attendee> listOfAttendees;
     private List<Feedback> feedbackList;
 
+
     // Constructor
     public Conference(String conferenceName, String startDate, String endDate) {
         this.conferenceName = conferenceName;
@@ -19,6 +20,7 @@ public class Conference {
         this.listOfSessions = new ArrayList<>();
         this.listOfAttendees = new ArrayList<>();
         this.feedbackList = new ArrayList<>();
+
     }
 
     // Register an attendee
@@ -74,20 +76,46 @@ public class Conference {
     }
 
     // Collect feedback
-    public void collectFeedback(String attendeeID, String comment, int rating) {
-        Attendee attendee = searchAttendeeByID(attendeeID);
-        if (attendee == null) {
-            System.out.println("Invalid attendee ID: " + attendeeID);
-            return;
-        }
+    public void collectFeedback(String attendeeID, String sessionID, String comment, int rating) {
+        // Check if the rating is valid (1-5)
         if (rating < 1 || rating > 5) {
             System.out.println("Invalid rating. Please provide a rating between 1 and 5.");
             return;
         }
+
+        // Create a unique feedback ID
         String feedbackID = "F" + (feedbackList.size() + 1);
-        Feedback feedback = new Feedback(feedbackID, attendeeID, comment, rating);
+
+        // Create a new feedback object (Now including the comment)
+        Feedback feedback = new Feedback(feedbackID, attendeeID, sessionID, comment, rating);
+
+        // Add feedback to the list
         feedbackList.add(feedback);
+
         System.out.println("Feedback collected: " + feedback);
+    }
+
+
+    // Get all feedbacks for a particular session
+    public List<Feedback> getFeedbackForSession(String sessionID) {
+        List<Feedback> sessionFeedback = new ArrayList<>();
+        for (Feedback feedback : feedbackList) {
+            if (feedback.getAttendeeID().equals(sessionID)) { // Match feedback with the session ID
+                sessionFeedback.add(feedback);
+            }
+        }
+        return sessionFeedback;
+    }
+
+    // Get all feedbacks for a particular attendee
+    public List<Feedback> getFeedbackForAttendee(String attendeeID) {
+        List<Feedback> attendeeFeedback = new ArrayList<>();
+        for (Feedback feedback : feedbackList) {
+            if (feedback.getAttendeeID().equals(attendeeID)) {  // Match feedback with the attendee ID
+                attendeeFeedback.add(feedback);
+            }
+        }
+        return attendeeFeedback;
     }
 
     // Notify an attendee

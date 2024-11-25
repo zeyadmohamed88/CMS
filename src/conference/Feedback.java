@@ -6,13 +6,15 @@ public class Feedback implements Serializable {
     private static final long serialVersionUID = 1L; // Ensures compatibility during serialization
     private String feedbackID;
     private String attendeeID;
+    private String sessionID;   // Session ID this feedback is linked to
     private String comment;
-    private int rating;
+    private int rating;         // Rating between 1 and 5
 
     // Constructor
-    public Feedback(String feedbackID, String attendeeID, String comment, int rating) {
+    public Feedback(String feedbackID, String attendeeID, String sessionID, String comment, int rating) {
         this.feedbackID = feedbackID;
         this.attendeeID = attendeeID;
+        this.sessionID = sessionID;
         this.comment = comment;
         this.rating = rating;
     }
@@ -26,6 +28,10 @@ public class Feedback implements Serializable {
         return attendeeID;
     }
 
+    public String getSessionID() {
+        return sessionID;
+    }
+
     public String getComment() {
         return comment;
     }
@@ -36,6 +42,7 @@ public class Feedback implements Serializable {
 
     @Override
     public String toString() {
-        return "Feedback [ID=" + feedbackID + ", Attendee=" + attendeeID + ", Comment=" + comment + ", Rating=" + rating + "]";
+        return "Feedback [ID=" + feedbackID + ", Attendee=" + attendeeID + ", Session=" + sessionID
+                + ", Comment=" + comment + ", Rating=" + rating + "]";
     }
 }
