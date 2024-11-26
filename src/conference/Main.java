@@ -1,41 +1,38 @@
 package conference;
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
-        // Create some attendees and sessions
-        Attendee attendee1 = new Attendee("John Doe", "john@example.com");
-        Attendee attendee2 = new Attendee("Jane Smith", "jane@example.com");
-        Session session1 = new Session("AI in Healthcare", "2025-05-10", "10:00", "Room 101");
+        // Create a list to store sessions
+        List<Session> sessions = new ArrayList<>();  // Declare and initialize the sessions list
 
-        // Register attendees and open session
+        // Create speakers using names from the rubric
+        Speaker speaker1 = new Speaker("S1", "Dr. Abram", "Expert in AI and Healthcare");
+        Speaker speaker2 = new Speaker("S2", "Dr. Nancy", "Specialist in Machine Learning");
+
+        // Create sessions with sessionCount passed as sessions.size()
+        Session session1 = new Session("AI in Healthcare", "2025-05-10", "10:00", "Room 101", sessions.size());
+        Session session2 = new Session("Machine Learning Advancements", "2025-05-11", "11:00", "Room 102", sessions.size());
+
+        // Add sessions to the sessions list
+        sessions.add(session1);
+        sessions.add(session2);
+
+        // Create the conference
         Conference conference = new Conference("GAF-AI 2025", "2025-05-01", "2025-05-05");
-        conference.registerAttendee(attendee1);
-        conference.registerAttendee(attendee2);
-        conference.openNewSession(session1);
 
-        // Mark attendance for the session
-        attendee1.markAttendance(session1);  // John Doe attends
-        attendee2.markAttendance(session1);  // Jane Smith attends
+        // Assign speakers to sessions
+        conference.assignSpeakerToSession(speaker1, session1);
+        conference.assignSpeakerToSession(speaker2, session2);
 
-        // Collect feedback for the session
-        conference.collectFeedback("A1", "S1", "Great session on AI applications in healthcare!", 5);  // John Doe's feedback
-        conference.collectFeedback("A2", "S1", "Very informative, but a bit too technical.", 4);  // Jane Smith's feedback
+        // Add speakers to the conference
+        conference.addSpeaker(speaker1);
+        conference.addSpeaker(speaker2);
 
-        // Get feedback for session
-        List<Feedback> sessionFeedback = conference.getFeedbackForSession("S1");
-        System.out.println("\nFeedback for session AI in Healthcare:");
-        for (Feedback feedback : sessionFeedback) {
-            System.out.println(feedback);
-        }
-
-        // Get feedback for an attendee
-        List<Feedback> attendee1Feedback = conference.getFeedbackForAttendee("A1");
-        System.out.println("\nFeedback by John Doe:");
-        for (Feedback feedback : attendee1Feedback) {
-            System.out.println(feedback);
-        }
+        // List all speakers and their sessions
+        System.out.println("List of Speakers and Their Sessions:");
+        conference.listSpeakersAndSessions();
     }
 }
-

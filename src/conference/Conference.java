@@ -10,6 +10,7 @@ public class Conference {
     private List<Session> listOfSessions;
     private List<Attendee> listOfAttendees;
     private List<Feedback> feedbackList;
+    private List<Speaker> listOfSpeakers;
 
 
     // Constructor
@@ -17,9 +18,10 @@ public class Conference {
         this.conferenceName = conferenceName;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.listOfSessions = new ArrayList<>();
         this.listOfAttendees = new ArrayList<>();
         this.feedbackList = new ArrayList<>();
+        this.listOfSpeakers = new ArrayList<>();
+        this.listOfSessions = new ArrayList<>();
 
     }
 
@@ -44,14 +46,28 @@ public class Conference {
 
     // Assign a speaker to a session
     public void assignSpeakerToSession(Speaker speaker, Session session) {
-        if (listOfSessions.contains(session)) {
-            session.setSpeaker(speaker);
-            speaker.addSession(session);
-            System.out.println("Speaker " + speaker.getName() + " assigned to session: " + session.getSessionName());
-        } else {
-            System.out.println("Session not found.");
+        session.setSpeaker(speaker);
+        speaker.addSession(session);
+        System.out.println(speaker.getName() + " assigned to session: " + session.getSessionName());
+    }
+
+
+    public void addSpeaker(Speaker speaker) {
+        listOfSpeakers.add(speaker);
+    }
+
+    // List all speakers and their sessions
+    public void listSpeakersAndSessions() {
+        for (Speaker speaker : listOfSpeakers) {
+            System.out.println(speaker);
+            System.out.println("Sessions:");
+            for (Session session : speaker.getSessions()) {
+                System.out.println(" - " + session.getSessionName() + " on " + session.getSessionDate() + " at " + session.getTime());
+            }
         }
     }
+
+
 
     // Add a session to an attendee's schedule
     public void addSessionToAttendeeSchedule(Attendee attendee, Session session) {
@@ -100,11 +116,21 @@ public class Conference {
     public List<Feedback> getFeedbackForSession(String sessionID) {
         List<Feedback> sessionFeedback = new ArrayList<>();
         for (Feedback feedback : feedbackList) {
-            if (feedback.getAttendeeID().equals(sessionID)) { // Match feedback with the session ID
+            if (feedback.getSessionID().equals(sessionID)) {  // Correctly check sessionID
                 sessionFeedback.add(feedback);
             }
         }
         return sessionFeedback;
+    }
+
+
+    public double calculateAverageRatingForSession(String sessionID) {
+        List<Feedback> sessionFeedback = getFeedbackForSession(sessionID);
+        int totalRating = 0;
+        for (Feedback feedback : sessionFeedback) {
+            totalRating += feedback.getRating();
+        }
+        return sessionFeedback.isEmpty() ? 0 : (double) totalRating / sessionFeedback.size();
     }
 
     // Get all feedbacks for a particular attendee

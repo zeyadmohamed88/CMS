@@ -12,15 +12,16 @@ public class Session implements Serializable {
     private String time;
     private String room;
     private Speaker speaker;
-    private List<Attendee> attendeesList;  // New list to track attendees
+    private List<Attendee> attendeesList;
 
-    // Constructor
-    public Session(String sessionName, String sessionDate, String time, String room) {
+    // Constructor that includes sessionCount for generating session ID
+    public Session(String sessionName, String sessionDate, String time, String room, int sessionCount) {
         this.sessionName = sessionName;
         this.sessionDate = sessionDate;
         this.time = time;
         this.room = room;
-        this.attendeesList = new ArrayList<>();  // Initialize the attendees list
+        this.attendeesList = new ArrayList<>();
+        this.sessionID = "S" + (sessionCount + 1); // Generate session ID (e.g., S1, S2, ...)
     }
 
     // Getters and setters
