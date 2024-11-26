@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Schedule implements Serializable {
     private static final long serialVersionUID = 1L;
-    private List<Session> sessionsList;
+    private List<Session> sessionsList;  // List of sessions the attendee is scheduled for
 
     // Constructor
     public Schedule() {

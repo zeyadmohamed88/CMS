@@ -14,6 +14,8 @@ public class ConferenceGUI extends Application {
     private ObservableList<Session> sessions = FXCollections.observableArrayList();
     // Observable list to store speakers (just a sample, can be extended)
     private ObservableList<Speaker> speakers = FXCollections.observableArrayList();
+    private ObservableList<Attendee> attendees = FXCollections.observableArrayList(); // List to store attendees
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -74,15 +76,19 @@ public class ConferenceGUI extends Application {
             if (name.isEmpty() || email.isEmpty()) {
                 showAlert("Error", "Name and Email are required!");
             } else {
-                // Here you can add the attendee to a list or database
+                // Create a new attendee and add to the attendees list
+                Attendee newAttendee = new Attendee(name, email);
+                newAttendee.setAttendeeID("A" + (attendees.size() + 1));  // Generate a unique ID for the attendee
+                attendees.add(newAttendee);  // Add the attendee to the attendees list
+
                 System.out.println("Attendee Registered: " + name + " | " + email);
-                primaryStage.close();  // Close the registration form after submitting
+                ((Stage) registrationLayout.getScene().getWindow()).close(); // Close only the registration form
             }
         });
 
         // Cancel Button to go back to the main window
         Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> primaryStage.close());
+        cancelButton.setOnAction(e -> ((Stage) registrationLayout.getScene().getWindow()).close());
 
         // Add all elements to the registration layout
         registrationLayout.getChildren().addAll(nameLabel, nameField, emailLabel, emailField, registerAttendeeButton, cancelButton);
@@ -96,6 +102,8 @@ public class ConferenceGUI extends Application {
         registrationStage.setScene(registrationScene);
         registrationStage.show();
     }
+
+
 
     // Method to show an alert (Error messages, etc.)
     private void showAlert(String title, String message) {
@@ -147,15 +155,16 @@ public class ConferenceGUI extends Application {
                 // Create a new session with sessionCount (5 parameters)
                 Session newSession = new Session(sessionName, sessionDate, sessionTime, sessionRoom, sessionCount);
                 newSession.setSpeaker(selectedSpeaker);
-                sessions.add(newSession);
+                sessions.add(newSession); // Add session to the sessions list
+
                 System.out.println("Session Added: " + newSession);
-                primaryStage.close(); // Close the form after adding the session
+                ((Stage) sessionLayout.getScene().getWindow()).close(); // Close only the add session form
             }
         });
 
         // Cancel button to close the form
         Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> primaryStage.close());
+        cancelButton.setOnAction(e -> ((Stage) sessionLayout.getScene().getWindow()).close());
 
         sessionLayout.getChildren().addAll(nameLabel, nameField, dateLabel, dateField, timeLabel, timeField, roomLabel, roomField, speakerLabel, speakerComboBox, addSessionButton, cancelButton);
 
@@ -168,25 +177,78 @@ public class ConferenceGUI extends Application {
 
 
 
+
     // Method to show all sessions in a list view
     private void showSessionsList(Stage primaryStage) {
         VBox listLayout = new VBox(10);
-        ListView<Session> sessionListView = new ListView<>(sessions);
 
-        // Add sessions to the ListView
+        // ListView to display sessions
+        ListView<Session> sessionListView = new ListView<>(sessions);
         sessionListView.setItems(sessions);
 
+        // Button to close the window
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> primaryStage.close());
 
-        listLayout.getChildren().addAll(sessionListView, closeButton);
+        // Add session selection functionality
+        sessionListView.setOnMouseClicked(e -> {
+            Session selectedSession = sessionListView.getSelectionModel().getSelectedItem();
+            if (selectedSession != null) {
+                showAttendanceWindow(selectedSession);
+            }
+        });
 
-        Scene listScene = new Scene(listLayout, 300, 250);
+        listLayout.getChildren().addAll(new Label("Sessions List:"), sessionListView, closeButton);
+
+        Scene listScene = new Scene(listLayout, 400, 300);
         Stage listStage = new Stage();
         listStage.setTitle("Sessions List");
         listStage.setScene(listScene);
         listStage.show();
     }
+
+    // Helper method to display the attendance marking window
+    private void showAttendanceWindow(Session session) {
+        VBox attendanceLayout = new VBox(10);
+
+        // Label for the selected session
+        Label sessionLabel = new Label("Session: " + session.getSessionName());
+
+        // ListView to display all attendees
+        ListView<Attendee> attendeeListView = new ListView<>(attendees);
+
+        // Button to mark attendance
+        Button markAttendanceButton = new Button("Mark Attendance");
+        markAttendanceButton.setOnAction(e -> {
+            Attendee selectedAttendee = attendeeListView.getSelectionModel().getSelectedItem();
+            if (selectedAttendee != null) {
+                session.markAttendance(selectedAttendee); // Mark attendance in the session
+                selectedAttendee.markAttendance(session); // Add session to the attendee's attended sessions
+                System.out.println("Attendance marked for: " + selectedAttendee.getName());
+            } else {
+                showAlert("Error", "Please select an attendee!");
+            }
+        });
+
+        // ListView to display attendees who are marked present
+        Label attendanceLabel = new Label("Attendees Marked Present:");
+        ListView<Attendee> attendanceListView = new ListView<>(FXCollections.observableArrayList(session.getAttendeesList()));
+
+        // Close button
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> ((Stage) attendanceLayout.getScene().getWindow()).close());
+
+        // Add all elements to the layout
+        attendanceLayout.getChildren().addAll(sessionLabel, attendeeListView, markAttendanceButton, attendanceLabel, attendanceListView, closeButton);
+
+        Scene attendanceScene = new Scene(attendanceLayout, 400, 400);
+        Stage attendanceStage = new Stage();
+        attendanceStage.setTitle("Mark Attendance");
+        attendanceStage.setScene(attendanceScene);
+        attendanceStage.show();
+    }
+
+
 
     public static void main(String[] args) {
         launch(args); // Launch the JavaFX application

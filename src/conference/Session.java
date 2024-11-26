@@ -12,7 +12,7 @@ public class Session implements Serializable {
     private String time;
     private String room;
     private Speaker speaker;
-    private List<Attendee> attendeesList;
+    private List<Attendee> attendeesList;  // List to track attendees
 
     // Constructor that includes sessionCount for generating session ID
     public Session(String sessionName, String sessionDate, String time, String room, int sessionCount) {
@@ -20,7 +20,7 @@ public class Session implements Serializable {
         this.sessionDate = sessionDate;
         this.time = time;
         this.room = room;
-        this.attendeesList = new ArrayList<>();
+        this.attendeesList = new ArrayList<>();  // Initialize the attendees list
         this.sessionID = "S" + (sessionCount + 1); // Generate session ID (e.g., S1, S2, ...)
     }
 
@@ -66,6 +66,7 @@ public class Session implements Serializable {
             System.out.println("Attendee " + attendee.getName() + " is already marked as present.");
         }
     }
+
 
     // Method to get the list of attendees
     public List<Attendee> getAttendeesList() {

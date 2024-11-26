@@ -9,14 +9,14 @@ public class Attendee implements Serializable {
     private String attendeeID;
     private String name;
     private String email;
-    private Schedule schedule;
+    private Schedule schedule;  // Stores the personalized schedule of the attendee
     private Set<Session> attendedSessions;  // Track sessions the attendee has attended
 
     // Constructor
     public Attendee(String name, String email) {
         this.name = name;
         this.email = email;
-        this.schedule = new Schedule();
+        this.schedule = new Schedule();  // Initialize the schedule
         this.attendedSessions = new HashSet<>();  // Initialize the attended sessions set
     }
 
