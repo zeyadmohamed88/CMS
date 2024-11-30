@@ -7,7 +7,7 @@ public class Speaker {
     private String speakerID;
     private String name;
     private String bio;
-    private List<Session> sessions;  // List of sessions the speaker is associated with
+    private List<Session> sessions;  // List of sessions the speaker is assigned to
 
     // Constructor
     public Speaker(String speakerID, String name, String bio) {
@@ -19,7 +19,12 @@ public class Speaker {
 
     // Add a session to the speaker's list
     public void addSession(Session session) {
-        sessions.add(session);
+        if (!sessions.contains(session)) {
+            sessions.add(session);
+            System.out.println("Session " + session.getSessionName() + " assigned to speaker: " + name);
+        } else {
+            System.out.println("Speaker " + name + " is already assigned to session: " + session.getSessionName());
+        }
     }
 
     // Get all sessions assigned to the speaker
@@ -27,7 +32,14 @@ public class Speaker {
         return sessions;
     }
 
-    // Getters
+    // Display all sessions for the speaker
+    public void displaySessions() {
+        System.out.println(name + " is assigned to the following sessions:");
+        for (Session session : sessions) {
+            System.out.println("- " + session.getSessionName());
+        }
+    }
+
     public String getSpeakerID() {
         return speakerID;
     }

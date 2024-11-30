@@ -46,9 +46,27 @@ public class Attendee implements Serializable {
         if (!attendedSessions.contains(session)) {
             attendedSessions.add(session);
             session.markAttendance(this);  // Mark attendance in the session as well
+            System.out.println("Attendance marked for " + name + " in session: " + session.getSessionName());
         } else {
             System.out.println("Attendee " + name + " has already attended the session: " + session.getSessionName());
         }
+    }
+
+    // Add a session to the attendee's schedule
+    public void addSessionToSchedule(Session session) {
+        schedule.addSession(session);
+        System.out.println("Session " + session.getSessionName() + " added to " + name + "'s schedule.");
+    }
+
+    // Remove a session from the attendee's schedule
+    public void removeSessionFromSchedule(Session session) {
+        schedule.removeSession(session);
+        System.out.println("Session " + session.getSessionName() + " removed from " + name + "'s schedule.");
+    }
+
+    // Display sessions in the attendee's schedule
+    public void displaySchedule() {
+        System.out.println(name + "'s Schedule: " + schedule);
     }
 
     @Override

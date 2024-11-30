@@ -12,106 +12,13 @@ public class ConferenceGUI extends Application {
 
     // Observable list to store sessions
     private ObservableList<Session> sessions = FXCollections.observableArrayList();
-    // Observable list to store speakers (just a sample, can be extended)
+    // Observable list to store speakers
     private ObservableList<Speaker> speakers = FXCollections.observableArrayList();
     private ObservableList<Attendee> attendees = FXCollections.observableArrayList(); // List to store attendees
 
-
     @Override
     public void start(Stage primaryStage) {
-        // Create some sample speakers
-        Speaker speaker1 = new Speaker("S1", "Dr. Abram", "AI and Healthcare Specialist");
-        Speaker speaker2 = new Speaker("S2", "Dr. Nancy", "Machine Learning Expert");
-        speakers.add(speaker1);
-        speakers.add(speaker2);
-
-        // Main layout for the window
-        VBox layout = new VBox(10);
-
-        // Label for the title
-        Label label = new Label("Welcome to the GAF-AI 2025 Conference Management");
-
-        // Buttons
-        Button registerButton = new Button("Register Attendee");
-        Button addSessionButton = new Button("Add Session");
-        Button showSessionsButton = new Button("Show Sessions");
-
-        // When the "Register Attendee" button is clicked
-        registerButton.setOnAction(e -> openRegistrationForm(primaryStage));
-
-        // When the "Add Session" button is clicked
-        addSessionButton.setOnAction(e -> openAddSessionForm(primaryStage));
-
-        // When the "Show Sessions" button is clicked
-        showSessionsButton.setOnAction(e -> showSessionsList(primaryStage));
-
-        // Add buttons and label to the layout
-        layout.getChildren().addAll(label, registerButton, addSessionButton, showSessionsButton);
-
-        // Set the scene and stage
-        Scene scene = new Scene(layout, 400, 300);
-        primaryStage.setTitle("Conference Management System");
-        primaryStage.setScene(scene);
-        primaryStage.show(); // Show the stage
-    }
-
-    // Method to open the form to register an attendee
-    private void openRegistrationForm(Stage primaryStage) {
-        VBox registrationLayout = new VBox(10);
-
-        // Labels and TextFields for name and email
-        Label nameLabel = new Label("Name:");
-        TextField nameField = new TextField();
-
-        Label emailLabel = new Label("Email:");
-        TextField emailField = new TextField();
-
-        // Register Button (will collect the entered information)
-        Button registerAttendeeButton = new Button("Register");
-
-        registerAttendeeButton.setOnAction(e -> {
-            String name = nameField.getText();
-            String email = emailField.getText();
-
-            if (name.isEmpty() || email.isEmpty()) {
-                showAlert("Error", "Name and Email are required!");
-            } else {
-                // Create a new attendee and add to the attendees list
-                Attendee newAttendee = new Attendee(name, email);
-                newAttendee.setAttendeeID("A" + (attendees.size() + 1));  // Generate a unique ID for the attendee
-                attendees.add(newAttendee);  // Add the attendee to the attendees list
-
-                System.out.println("Attendee Registered: " + name + " | " + email);
-                ((Stage) registrationLayout.getScene().getWindow()).close(); // Close only the registration form
-            }
-        });
-
-        // Cancel Button to go back to the main window
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> ((Stage) registrationLayout.getScene().getWindow()).close());
-
-        // Add all elements to the registration layout
-        registrationLayout.getChildren().addAll(nameLabel, nameField, emailLabel, emailField, registerAttendeeButton, cancelButton);
-
-        // Create a new scene for the registration form
-        Scene registrationScene = new Scene(registrationLayout, 300, 200);
-
-        // Create a new stage for the registration form (this opens in a new window)
-        Stage registrationStage = new Stage();
-        registrationStage.setTitle("Register Attendee");
-        registrationStage.setScene(registrationScene);
-        registrationStage.show();
-    }
-
-
-
-    // Method to show an alert (Error messages, etc.)
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        openRoleSelectionPage(primaryStage); // Start role selection
     }
 
     // Method to open the form to add a new session
@@ -152,11 +59,12 @@ public class ConferenceGUI extends Application {
                 int sessionCount = sessions.size();  // Get the current count of sessions
                 Speaker selectedSpeaker = speakerComboBox.getValue();
 
-                // Create a new session with sessionCount (5 parameters)
+                // Create a new session
                 Session newSession = new Session(sessionName, sessionDate, sessionTime, sessionRoom, sessionCount);
                 newSession.setSpeaker(selectedSpeaker);
                 sessions.add(newSession); // Add session to the sessions list
 
+                // Optionally, you could display the session immediately in the list or any other feedback
                 System.out.println("Session Added: " + newSession);
                 ((Stage) sessionLayout.getScene().getWindow()).close(); // Close only the add session form
             }
@@ -168,6 +76,7 @@ public class ConferenceGUI extends Application {
 
         sessionLayout.getChildren().addAll(nameLabel, nameField, dateLabel, dateField, timeLabel, timeField, roomLabel, roomField, speakerLabel, speakerComboBox, addSessionButton, cancelButton);
 
+        // Create a new scene for the session form
         Scene sessionScene = new Scene(sessionLayout, 300, 350);
         Stage sessionStage = new Stage();
         sessionStage.setTitle("Add Session");
@@ -175,6 +84,164 @@ public class ConferenceGUI extends Application {
         sessionStage.show();
     }
 
+
+    // Role Selection Page (First Page)
+    private void openRoleSelectionPage(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Select your role:");
+
+        // Buttons for selecting role
+        Button speakerButton = new Button("Speaker");
+        Button attendeeButton = new Button("Attendee");
+
+        speakerButton.setOnAction(e -> openSpeakerPage(primaryStage)); // Navigate to speaker page
+        attendeeButton.setOnAction(e -> openAttendeePage(primaryStage)); // Navigate to attendee page
+
+        layout.getChildren().addAll(label, speakerButton, attendeeButton);
+
+        Scene scene = new Scene(layout, 300, 200);
+        primaryStage.setTitle("Role Selection");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    // Speaker Page (Options for Speaker)
+    // Speaker Page (Options for Speaker)
+    private void openSpeakerPage(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Speaker Options:");
+
+        // Button to add session (for Speakers only)
+        Button addSessionButton = new Button("Add Session");
+        addSessionButton.setOnAction(e -> openAddSessionForm(primaryStage));
+
+        // Button to show sessions
+        Button showSessionsButton = new Button("Show Sessions");
+        showSessionsButton.setOnAction(e -> showSpeakerSessions(primaryStage));
+
+        layout.getChildren().addAll(label, addSessionButton, showSessionsButton);
+
+        Scene scene = new Scene(layout, 300, 200);
+        primaryStage.setTitle("Speaker Dashboard");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    // Attendee Page (Options for Attendee)
+    private void openAttendeePage(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Attendee Options:");
+
+        // Button to register attendee
+        Button registerButton = new Button("Register Attendee");
+        registerButton.setOnAction(e -> openRegistrationForm(primaryStage));
+
+        // Button to show sessions
+        Button showSessionsButton = new Button("Show Sessions");
+        showSessionsButton.setOnAction(e -> showSessionsList(primaryStage));
+
+        layout.getChildren().addAll(label, registerButton, showSessionsButton);
+
+        Scene scene = new Scene(layout, 300, 200);
+        primaryStage.setTitle("Attendee Dashboard");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+
+    // Method to open the form to register an attendee
+    private void openRegistrationForm(Stage primaryStage) {
+        VBox registrationLayout = new VBox(10);
+
+        // Labels and TextFields for name and email
+        Label nameLabel = new Label("Name:");
+        TextField nameField = new TextField();
+
+        Label emailLabel = new Label("Email:");
+        TextField emailField = new TextField();
+
+        // Register Button (will collect the entered information)
+        Button registerAttendeeButton = new Button("Register");
+
+        registerAttendeeButton.setOnAction(e -> {
+            String name = nameField.getText();
+            String email = emailField.getText();
+
+            if (name.isEmpty() || email.isEmpty()) {
+                showAlert("Error", "Name and Email are required!");
+            } else {
+                // Create a new attendee and add to the attendees list
+                Attendee newAttendee = new Attendee(name, email);
+                newAttendee.setAttendeeID("A" + (attendees.size() + 1));  // Generate a unique ID for the attendee
+                attendees.add(newAttendee);  // Add the attendee to the attendees list
+
+                // Display the schedule
+                showAttendeeSchedule(newAttendee);
+
+                System.out.println("Attendee Registered: " + name + " | " + email);
+                ((Stage) registrationLayout.getScene().getWindow()).close(); // Close only the registration form
+            }
+        });
+
+        // Cancel Button to go back to the main window
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(e -> ((Stage) registrationLayout.getScene().getWindow()).close());
+
+        // Add all elements to the registration layout
+        registrationLayout.getChildren().addAll(nameLabel, nameField, emailLabel, emailField, registerAttendeeButton, cancelButton);
+
+        // Create a new scene for the registration form
+        Scene registrationScene = new Scene(registrationLayout, 300, 200);
+
+        // Create a new stage for the registration form (this opens in a new window)
+        Stage registrationStage = new Stage();
+        registrationStage.setTitle("Register Attendee");
+        registrationStage.setScene(registrationScene);
+        registrationStage.show();
+    }
+
+    // Method to show an attendee's schedule after registration
+    // Method to show an attendee's schedule after registration
+    private void showAttendeeSchedule(Attendee attendee) {
+        VBox layout = new VBox(10);
+        Label label = new Label(attendee.getName() + "'s Schedule:");
+
+        // ListView to display the attendee's schedule (sessions)
+        ListView<Session> scheduleListView = new ListView<>(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+        layout.getChildren().addAll(label, scheduleListView);
+
+        // Button to add a session to the schedule
+        Button addSessionButton = new Button("Add Session");
+        addSessionButton.setOnAction(e -> addSessionToAttendeeSchedule(attendee)); // Implement add session functionality
+        layout.getChildren().add(addSessionButton);
+
+        // Show the attendee schedule in a new window
+        Scene scene = new Scene(layout, 400, 300);
+        Stage scheduleStage = new Stage();
+        scheduleStage.setTitle("Schedule for " + attendee.getName());
+        scheduleStage.setScene(scene);
+        scheduleStage.show();
+    }
+
+
+    // Method to add a session to an attendee's schedule
+    // Method to add a session to an attendee's schedule
+    private void addSessionToAttendeeSchedule(Attendee attendee) {
+        // Create a session selection form or allow the attendee to pick a session from available sessions
+        if (!sessions.isEmpty()) {
+            // Add the first session to the attendee's schedule for demonstration
+            attendee.addSessionToSchedule(sessions.get(0)); // Just adding the first session for now
+
+            // Update the ListView to reflect the new schedule
+            showAttendeeSchedule(attendee);
+        }
+    }
+
+    // Method to remove a session from an attendee's schedule
+    private void removeSessionFromSchedule(Attendee attendee, Session session) {
+        attendee.getSchedule().removeSession(session);  // Remove session from attendee's schedule
+        showAttendeeSchedule(attendee);  // Refresh the schedule display
+    }
 
 
 
@@ -205,6 +272,29 @@ public class ConferenceGUI extends Application {
         listStage.setTitle("Sessions List");
         listStage.setScene(listScene);
         listStage.show();
+    }
+
+    // Method to show sessions assigned to a speaker
+    private void showSpeakerSessions(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Speaker Sessions:");
+
+        // Create a list view to show the sessions assigned to the speaker
+        ListView<Session> speakerSessionsListView = new ListView<>();
+        speakerSessionsListView.setItems(FXCollections.observableArrayList(speakers.get(0).getSessions()));
+
+        layout.getChildren().addAll(label, speakerSessionsListView);
+
+        // Close button
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> primaryStage.close());
+        layout.getChildren().add(closeButton);
+
+        Scene scene = new Scene(layout, 400, 300);
+        Stage sessionStage = new Stage();
+        sessionStage.setTitle("Speaker's Assigned Sessions");
+        sessionStage.setScene(scene);
+        sessionStage.show();
     }
 
     // Helper method to display the attendance marking window
@@ -248,7 +338,73 @@ public class ConferenceGUI extends Application {
         attendanceStage.show();
     }
 
+    // Collect feedback from an attendee for a session
+    private void collectFeedback(Attendee attendee, Session session) {
+        VBox feedbackLayout = new VBox(10);
 
+        // Label for rating
+        Label ratingLabel = new Label("Rate the session (1 to 5):");
+        TextField ratingField = new TextField();
+
+        // Label for comment
+        Label commentLabel = new Label("Your Comment:");
+        TextArea commentArea = new TextArea();
+
+        // Button to submit feedback
+        Button submitFeedbackButton = new Button("Submit Feedback");
+        submitFeedbackButton.setOnAction(e -> {
+            int rating = Integer.parseInt(ratingField.getText());
+            String comment = commentArea.getText();
+
+            // Create feedback
+            Feedback feedback = new Feedback("F" + (session.getFeedbackList().size() + 1), attendee.getAttendeeID(), session.getSessionID(), comment, rating);
+
+            // Add feedback to session
+            session.addFeedback(feedback);
+
+            // Optionally, show confirmation
+            showAlert("Thank you!", "Your feedback has been submitted.");
+
+            // Close the feedback form
+            ((Stage) feedbackLayout.getScene().getWindow()).close();
+        });
+
+        feedbackLayout.getChildren().addAll(ratingLabel, ratingField, commentLabel, commentArea, submitFeedbackButton);
+
+        Scene feedbackScene = new Scene(feedbackLayout, 300, 200);
+        Stage feedbackStage = new Stage();
+        feedbackStage.setTitle("Feedback for " + session.getSessionName());
+        feedbackStage.setScene(feedbackScene);
+        feedbackStage.show();
+    }
+
+    // Method to show the feedback for a session
+    private void showSessionFeedback(Session session) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Feedback for Session: " + session.getSessionName());
+
+        // ListView to display all feedback
+        ListView<Feedback> feedbackListView = new ListView<>(FXCollections.observableArrayList(session.getFeedbackList()));
+        layout.getChildren().addAll(label, feedbackListView);
+
+        // Show feedback in a new window
+        Scene scene = new Scene(layout, 400, 300);
+        Stage feedbackStage = new Stage();
+        feedbackStage.setTitle("Session Feedback");
+        feedbackStage.setScene(scene);
+        feedbackStage.show();
+    }
+
+
+
+    // Method to show an alert (Error messages, etc.)
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
     public static void main(String[] args) {
         launch(args); // Launch the JavaFX application
