@@ -13,7 +13,7 @@ public class Session implements Serializable {
     private String room;
     private Speaker speaker;
     private List<Attendee> attendeesList;  // List to track attendees
-    private List<Feedback> feedbackList;  // List to store feedbacks for this session
+    private List<Feedback> feedbackList;  // List to store feedback for this session
 
     // Constructor that includes sessionCount for generating session ID
     public Session(String sessionName, String sessionDate, String time, String room, int sessionCount) {
@@ -79,7 +79,7 @@ public class Session implements Serializable {
         feedbackList.add(feedback);
     }
 
-    // Method to get the list of feedbacks for this session
+    // Method to get the list of feedback for this session
     public List<Feedback> getFeedbackList() {
         return feedbackList;
     }

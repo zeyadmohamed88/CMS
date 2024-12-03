@@ -69,6 +69,14 @@ public class Attendee implements Serializable {
         System.out.println(name + "'s Schedule: " + schedule);
     }
 
+    // Method to submit feedback for a session
+    public void submitFeedback(Session session, String comment, int rating) {
+        // Generate feedback ID based on the current feedback list size
+        String feedbackID = "F" + (session.getFeedbackList().size() + 1);
+        Feedback feedback = new Feedback(feedbackID, this.getAttendeeID(), session.getSessionID(), comment, rating);
+        session.addFeedback(feedback);
+    }
+
     @Override
     public String toString() {
         return "Attendee [ID=" + attendeeID + ", Name=" + name + ", Email=" + email + "]";
