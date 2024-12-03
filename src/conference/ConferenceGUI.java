@@ -8,7 +8,13 @@ import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.List;
+
 public class ConferenceGUI extends Application {
+
+    Conference conference = new Conference("Conference Name", "2024-01-01", "2024-01-02");
+
+
 
     // Observable list to store sessions, speakers, and attendees
     private ObservableList<Session> sessions = FXCollections.observableArrayList();
@@ -16,10 +22,27 @@ public class ConferenceGUI extends Application {
     private ObservableList<Attendee> attendees = FXCollections.observableArrayList();
     private ListView<Session> scheduleListView;
 
+
     @Override
     public void start(Stage primaryStage) {
-        openLoginPage(primaryStage); // Start the login page
+        // Load data at the start of the application
+        Conference conference = FileUtils.loadConferenceData();
+        // Now the conference object has the sessions, attendees, and feedback loaded
+
+        // Set up the GUI as usual...
     }
+
+    // Before the app closes, save the data to files
+    // Before the app closes, save the data to files
+    private void saveDataBeforeClosing() {
+        if (conference != null) {
+            FileUtils.saveConferenceData(conference); // Save the loaded conference data to files
+        }
+    }
+
+
+// To call this, you might want to add a shutdown hook or call it explicitly before closing the window
+
 
     // Method to open the login page
     private void openLoginPage(Stage primaryStage) {
@@ -94,6 +117,10 @@ public class ConferenceGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+
+
+
 
     // Method to open the Attendee Dashboard after login
     private void openAttendeePage(Stage primaryStage, Attendee attendee) {
@@ -181,6 +208,37 @@ public class ConferenceGUI extends Application {
         scheduleStage.show();
     }
 
+    private void showAttendanceReport(Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Session Attendance Report");
+
+        // Create a ListView to display sessions and number of attendees
+        ListView<String> reportListView = new ListView<>();
+
+        // Get the list of sessions from the Conference instance
+        List<Session> sessionList = conference.getListOfSessions();;  // Assuming getListOfSessions() returns the list of sessions
+
+        for (Session session : sessionList) {
+            int numOfAttendees = session.getAttendeesList().size();
+            reportListView.getItems().add("Session: " + session.getSessionName() + " | Attendees: " + numOfAttendees);
+        }
+
+        layout.getChildren().addAll(label, reportListView);
+
+        // Button to close the report window
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> primaryStage.close());
+        layout.getChildren().add(closeButton);
+
+        Scene scene = new Scene(layout, 400, 300);
+        Stage reportStage = new Stage();
+        reportStage.setTitle("Attendance Report");
+        reportStage.setScene(scene);
+        reportStage.show();
+    }
+
+
+
     // Method to open the feedback form for the attendee
     // In the Attendee Dashboard, where attendees can submit feedback
     private void openFeedbackForm(Attendee attendee, Stage primaryStage) {
@@ -231,6 +289,13 @@ public class ConferenceGUI extends Application {
         feedbackStage.setScene(scene);
         feedbackStage.show();
     }
+
+    // Collect feedback when an attendee selects a session
+    private void collectFeedbackForSession(Attendee attendee, Session session, String comment, int rating) {
+        // Call the collectFeedback() method on the session
+        session.collectFeedback(attendee, comment, rating);
+    }
+
 
 
 

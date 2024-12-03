@@ -29,33 +29,62 @@ public class FileUtils {
         return new ArrayList<>();
     }
 
-    // Save attendees to a file
-    public static void saveAttendees(List<Attendee> attendees) {
-        saveToFile("attendees.dat", attendees);  // Save attendees list to "attendees.dat"
-    }
-
-    // Load attendees from a file
-    public static List<Attendee> loadAttendees() {
-        return loadFromFile("attendees.dat");  // Load attendees from "attendees.dat"
-    }
-
     // Save sessions to a file
     public static void saveSessions(List<Session> sessions) {
-        saveToFile("sessions.dat", sessions);  // Save sessions list to "sessions.dat"
+        saveToFile("sessions.dat", sessions);
     }
 
     // Load sessions from a file
     public static List<Session> loadSessions() {
-        return loadFromFile("sessions.dat");  // Load sessions from "sessions.dat"
+        return loadFromFile("sessions.dat");
+    }
+
+    // Save attendees to a file
+    public static void saveAttendees(List<Attendee> attendees) {
+        saveToFile("attendees.dat", attendees);
+    }
+
+    // Load attendees from a file
+    public static List<Attendee> loadAttendees() {
+        return loadFromFile("attendees.dat");
     }
 
     // Save feedback to a file
     public static void saveFeedback(List<Feedback> feedbackList) {
-        saveToFile("feedback.dat", feedbackList);  // Save feedback list to "feedback.dat"
+        saveToFile("feedback.dat", feedbackList);
     }
 
     // Load feedback from a file
     public static List<Feedback> loadFeedback() {
-        return loadFromFile("feedback.dat");  // Load feedback from "feedback.dat"
+        return loadFromFile("feedback.dat");
+    }
+
+    // Save sessions, attendees, and feedback to file
+    public static void saveConferenceData(Conference conference) {
+        saveSessions(conference.getListOfSessions());
+        saveAttendees(conference.getListOfAttendees());
+        saveFeedback(conference.getFeedbackList());
+    }
+
+    // Load sessions, attendees, and feedback from file
+    public static Conference loadConferenceData() {
+        List<Session> sessions = loadSessions();
+        List<Attendee> attendees = loadAttendees();
+        List<Feedback> feedback = loadFeedback();
+
+        // Recreate the conference instance and restore the data
+        Conference conference = new Conference("GAF-AI 2025", "2025-01-01", "2025-01-07");
+
+        for (Session session : sessions) {
+            conference.openNewSession(session);  // Add sessions back to the conference
+        }
+        for (Attendee attendee : attendees) {
+            conference.registerAttendee(attendee);  // Register attendees
+        }
+        for (Feedback fb : feedback) {
+            conference.collectFeedback(fb.getAttendeeID(), fb.getSessionID(), fb.getComment(), fb.getRating());  // Collect feedbacks
+        }
+
+        return conference;
     }
 }

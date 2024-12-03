@@ -12,7 +12,6 @@ public class Conference {
     private List<Feedback> feedbackList;
     private List<Speaker> listOfSpeakers;
 
-
     // Constructor
     public Conference(String conferenceName, String startDate, String endDate) {
         this.conferenceName = conferenceName;
@@ -22,7 +21,6 @@ public class Conference {
         this.feedbackList = new ArrayList<>();
         this.listOfSpeakers = new ArrayList<>();
         this.listOfSessions = new ArrayList<>();
-
     }
 
     // Register an attendee
@@ -51,7 +49,6 @@ public class Conference {
         System.out.println(speaker.getName() + " assigned to session: " + session.getSessionName());
     }
 
-
     public void addSpeaker(Speaker speaker) {
         listOfSpeakers.add(speaker);
     }
@@ -66,8 +63,6 @@ public class Conference {
             }
         }
     }
-
-
 
     // Add a session to an attendee's schedule
     public void addSessionToAttendeeSchedule(Attendee attendee, Session session) {
@@ -93,23 +88,26 @@ public class Conference {
 
     // Collect feedback
     public void collectFeedback(String attendeeID, String sessionID, String comment, int rating) {
-        // Check if the rating is valid (1-5)
-        if (rating < 1 || rating > 5) {
-            System.out.println("Invalid rating. Please provide a rating between 1 and 5.");
-            return;
+        // Retrieve the session using sessionID
+        Session session = searchSessionByID(sessionID);
+        if (session == null) {
+            System.out.println("Session not found with ID: " + sessionID);
+            return; // Exit if no valid session is found
         }
 
         // Create a unique feedback ID
         String feedbackID = "F" + (feedbackList.size() + 1);
 
-        // Create a new feedback object (Now including the comment)
-        Feedback feedback = new Feedback(feedbackID, attendeeID, sessionID, comment, rating);
+        // Create a new feedback object and associate the session
+        Feedback feedback = new Feedback(feedbackID, attendeeID, session.getSessionID(), comment, rating);
+        session.addFeedback(feedback);  // Ensure the feedback is associated with the session
 
-        // Add feedback to the list
+        // Add feedback to the global feedback list
         feedbackList.add(feedback);
 
         System.out.println("Feedback collected: " + feedback);
     }
+
 
 
     // Get all feedbacks for a particular session
@@ -123,33 +121,62 @@ public class Conference {
         return sessionFeedback;
     }
 
-
     public double calculateAverageRatingForSession(String sessionID) {
-        List<Feedback> sessionFeedback = getFeedbackForSession(sessionID);
-        int totalRating = 0;
-        for (Feedback feedback : sessionFeedback) {
-            totalRating += feedback.getRating();
+        Session session = searchSessionByID(sessionID);
+        if (session != null) {
+            List<Feedback> feedbacks = session.getFeedbackList();
+            int totalRating = 0;
+            for (Feedback feedback : feedbacks) {
+                totalRating += feedback.getRating();
+            }
+            return feedbacks.size() > 0 ? (double) totalRating / feedbacks.size() : 0;
         }
-        return sessionFeedback.isEmpty() ? 0 : (double) totalRating / sessionFeedback.size();
+        return 0;
     }
 
-    // Get all feedbacks for a particular attendee
-    public List<Feedback> getFeedbackForAttendee(String attendeeID) {
-        List<Feedback> attendeeFeedback = new ArrayList<>();
-        for (Feedback feedback : feedbackList) {
-            if (feedback.getAttendeeID().equals(attendeeID)) {  // Match feedback with the attendee ID
-                attendeeFeedback.add(feedback);
+    // Generate a detailed report for a session
+    public void generateSessionReport(String sessionID) {
+        Session session = searchSessionByID(sessionID);
+        if (session != null) {
+            System.out.println("Session: " + session.getSessionName());
+            System.out.println("Speaker: " + session.getSpeaker().getName());
+            System.out.println("Attendees: ");
+            for (Attendee attendee : session.getAttendeesList()) {
+                System.out.println(" - " + attendee.getName());
             }
+            double avgRating = calculateAverageRatingForSession(sessionID);
+            System.out.println("Average Rating: " + avgRating);
         }
-        return attendeeFeedback;
+    }
+
+    // Generate the attendance report for all sessions
+    public void generateAttendanceReport() {
+        System.out.println("Session Attendance Report:");
+        for (Session session : listOfSessions) {
+            int numOfAttendees = session.getAttendeesList().size();
+            System.out.println("Session: " + session.getSessionName() + " | Attendees: " + numOfAttendees);
+        }
+    }
+
+    // Generate the feedback summary for a session
+    public void generateFeedbackSummary(String sessionID) {
+        Session session = searchSessionByID(sessionID);
+        if (session != null) {
+            System.out.println("Feedback for Session: " + session.getSessionName());
+            for (Feedback feedback : session.getFeedbackList()) {
+                System.out.println("Attendee ID: " + feedback.getAttendeeID());
+                System.out.println("Rating: " + feedback.getRating());
+                System.out.println("Comment: " + feedback.getComment());
+            }
+            double avgRating = calculateAverageRatingForSession(sessionID);
+            System.out.println("Average Rating: " + avgRating);
+        }
     }
 
     // Notify an attendee
     private void notifyAttendee(Attendee attendee, String message) {
         System.out.println("Notification for " + attendee.getName() + ": " + message);
     }
-
-
 
     // Notify all attendees
     private void notifyAllAttendees(String message) {
@@ -158,6 +185,7 @@ public class Conference {
         }
     }
 
+    // Mark attendance for a session
     public void markAttendanceForSession(Session session) {
         for (Attendee attendee : listOfAttendees) {
             if (attendee.getSchedule().getSessionsList().contains(session)) {
@@ -182,6 +210,16 @@ public class Conference {
         }
     }
 
+    // Get the attendees for a particular session
+    public List<Attendee> getAttendeesForSession(String sessionID) {
+        List<Attendee> sessionAttendees = new ArrayList<>();
+        for (Session session : listOfSessions) {
+            if (session.getSessionID().equals(sessionID)) {
+                sessionAttendees.addAll(session.getAttendeesList());
+            }
+        }
+        return sessionAttendees;
+    }
 
     // Search for an attendee by ID
     public Attendee searchAttendeeByID(String attendeeID) {
@@ -212,5 +250,9 @@ public class Conference {
 
     public List<Attendee> getListOfAttendees() {
         return listOfAttendees;
+    }
+
+    public List<Session> getListOfSessions() {
+        return listOfSessions;
     }
 }
