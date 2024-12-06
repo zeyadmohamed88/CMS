@@ -88,6 +88,18 @@ public class Attendee implements Serializable {
         String feedbackID = "F" + (session.getFeedbackList().size() + 1);
         Feedback feedback = new Feedback(feedbackID, this.getAttendeeID(), session.getSessionID(), comment, rating);
         session.addFeedback(feedback);
+        System.out.println("Feedback submitted by " + name + " for session: " + session.getSessionName());
+    }
+
+    // Get all sessions an attendee has attended
+    public Set<Session> getAttendedSessions() {
+        return attendedSessions;  // Return the set of attended sessions
+    }
+
+    // Add an attendee to a session's list
+    public void addAttendeeToSession(Session session) {
+        session.getAttendees();
+        System.out.println(name + " has been added to the session: " + session.getSessionName());
     }
 
     @Override

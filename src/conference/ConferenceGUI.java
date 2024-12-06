@@ -243,13 +243,40 @@ public class ConferenceGUI extends Application {
         VBox layout = new VBox(10);
         Label label = new Label("Sessions of " + speaker.getName());
 
-        // Explicitly specify the type parameter <Session>
+        // ListView to display sessions the speaker has
         ListView<Session> speakerSessionsListView = new ListView<>();
-
-        // Assuming speaker.getSessions() returns a List<Session>, you can set the items for the ListView
         speakerSessionsListView.getItems().setAll(speaker.getSessions());
 
-        layout.getChildren().addAll(label, speakerSessionsListView);
+        Button generateCertificatesButton = new Button("Generate Certificates for Attendees");
+        generateCertificatesButton.setOnAction(e -> {
+            Session selectedSession = speakerSessionsListView.getSelectionModel().getSelectedItem();
+            if (selectedSession != null) {
+                // Generate certificates for attendees of the selected session
+                List<Attendee> attendeesOfSession = selectedSession.getAttendees();  // Assuming Session has a method to get attendees
+
+                if (attendeesOfSession.isEmpty()) {
+                    showAlert("Error", "No attendees found for this session.");
+                    return;
+                }
+
+                for (Attendee attendee : attendeesOfSession) {
+                    // Create a Certificate for each attendee
+                    Certificate certificate = new Certificate();
+                    certificate.setCertificateID("C" + (attendeesOfSession.indexOf(attendee) + 1));
+                    certificate.setAttendeeID(attendee.getAttendeeID());
+                    certificate.setConferenceName("Sample Conference");  // You can replace this with the actual conference nam
+                    certificate.setIssueDate(java.time.LocalDate.now().toString());  // Issue date as current date
+
+                    certificate.generateCertificate();
+                }
+
+                showAlert("Success", "Certificates generated for all attendees of the session.");
+            } else {
+                showAlert("Error", "Please select a session first.");
+            }
+        });
+
+        layout.getChildren().addAll(label, speakerSessionsListView, generateCertificatesButton);
 
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> {
@@ -264,6 +291,8 @@ public class ConferenceGUI extends Application {
         sessionStage.setScene(scene);
         sessionStage.show();
     }
+
+
 
 
     private void addSessionToAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {

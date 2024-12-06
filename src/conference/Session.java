@@ -88,7 +88,7 @@ public class Session implements Serializable {
 
     // Method to get the list of attendees
     public List<Attendee> getAttendeesList() {
-        return attendeesList;
+        return attendeesList;  // Returns the list of attendees for the session
     }
 
     // Method to add feedback to this session
@@ -98,7 +98,7 @@ public class Session implements Serializable {
 
     // Method to get the list of feedback for this session
     public List<Feedback> getFeedbackList() {
-        return feedbackList;
+        return feedbackList;  // Returns the list of feedback for the session
     }
 
     // Method to collect feedback for this session
@@ -117,6 +117,11 @@ public class Session implements Serializable {
         feedbackList.add(feedback);
 
         System.out.println("Feedback collected: " + feedback);
+    }
+
+    // New method: Get attendees (direct access method)
+    public List<Attendee> getAttendees() {
+        return new ArrayList<>(attendeesList);  // Return a copy of the list to avoid external modification
     }
 
     @Override
