@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Session implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String sessionID;
     private String sessionName;
     private String sessionDate;
@@ -39,16 +40,32 @@ public class Session implements Serializable {
         return sessionName;
     }
 
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
+
     public String getSessionDate() {
         return sessionDate;
+    }
+
+    public void setSessionDate(String sessionDate) {
+        this.sessionDate = sessionDate;
     }
 
     public String getTime() {
         return time;
     }
 
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public String getRoom() {
         return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
     }
 
     public Speaker getSpeaker() {
@@ -85,8 +102,6 @@ public class Session implements Serializable {
     }
 
     // Method to collect feedback for this session
-    // Method to collect feedback for this session
-    // Method to collect feedback for this session
     public void collectFeedback(Attendee attendee, String comment, int rating) {
         // Check if the session has already been attended by the attendee
         if (!attendeesList.contains(attendee)) {
@@ -97,16 +112,12 @@ public class Session implements Serializable {
         // Create a unique feedback ID
         String feedbackID = "F" + (feedbackList.size() + 1);
 
-        // Ensure that the sessionID is properly assigned
+        // Create the Feedback object and add it to the session's feedback list
         Feedback feedback = new Feedback(feedbackID, attendee.getAttendeeID(), this.sessionID, comment, rating);
-
-        // Add the feedback to the session's feedback list
         feedbackList.add(feedback);
 
         System.out.println("Feedback collected: " + feedback);
     }
-
-
 
     @Override
     public String toString() {

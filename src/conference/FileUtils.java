@@ -6,11 +6,18 @@ import java.util.List;
 
 public class FileUtils {
 
+    private static final String DATA_DIR = System.getProperty("user.dir") + File.separator + "data";
+
+    // Helper method to get the full file path
+    private static String getFilePath(String fileName) {
+        return DATA_DIR + File.separator + fileName;
+    }
+
     // Save a list of objects (e.g., attendees, sessions, feedback) to a file
     public static <T> void saveToFile(String fileName, List<T> data) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(getFilePath(fileName)))) {
             oos.writeObject(data);
-            System.out.println("Data saved to file: " + fileName);
+            System.out.println("Data saved to file: " + getFilePath(fileName));
         } catch (IOException e) {
             System.err.println("Error saving data to file: " + e.getMessage());
         }
@@ -19,10 +26,10 @@ public class FileUtils {
     // Load a list of objects from a file
     @SuppressWarnings("unchecked")
     public static <T> List<T> loadFromFile(String fileName) {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(getFilePath(fileName)))) {
             return (List<T>) ois.readObject();
         } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + fileName + ". Initializing new data.");
+            System.out.println("File not found: " + getFilePath(fileName) + ". Initializing new data.");
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error loading data from file: " + e.getMessage());
         }
@@ -59,18 +66,30 @@ public class FileUtils {
         return loadFromFile("feedback.dat");
     }
 
-    // Save sessions, attendees, and feedback to file
+    // Save speakers to a file
+    public static void saveSpeakers(List<Speaker> speakers) {
+        saveToFile("speakers.dat", speakers);
+    }
+
+    // Load speakers from a file
+    public static List<Speaker> loadSpeakers() {
+        return loadFromFile("speakers.dat");
+    }
+
+    // Save sessions, attendees, feedback, and speakers to file
     public static void saveConferenceData(Conference conference) {
         saveSessions(conference.getListOfSessions());
         saveAttendees(conference.getListOfAttendees());
         saveFeedback(conference.getFeedbackList());
+        saveSpeakers(conference.getListOfSpeakers());
     }
 
-    // Load sessions, attendees, and feedback from file
+    // Load sessions, attendees, feedback, and speakers from file
     public static Conference loadConferenceData() {
         List<Session> sessions = loadSessions();
         List<Attendee> attendees = loadAttendees();
         List<Feedback> feedback = loadFeedback();
+        List<Speaker> speakers = loadSpeakers();
 
         // Recreate the conference instance and restore the data
         Conference conference = new Conference("GAF-AI 2025", "2025-01-01", "2025-01-07");
@@ -83,6 +102,9 @@ public class FileUtils {
         }
         for (Feedback fb : feedback) {
             conference.collectFeedback(fb.getAttendeeID(), fb.getSessionID(), fb.getComment(), fb.getRating());  // Collect feedbacks
+        }
+        for (Speaker speaker : speakers) {
+            conference.addSpeaker(speaker);  // Add speakers back to the conference
         }
 
         return conference;

@@ -11,6 +11,7 @@ public class Attendee implements Serializable {
     private String email;
     private Schedule schedule;  // Stores the personalized schedule of the attendee
     private Set<Session> attendedSessions;  // Track sessions the attendee has attended
+    private Session currentSession;  // Store the current session the attendee is attending
 
     // Constructor
     public Attendee(String name, String email) {
@@ -18,6 +19,7 @@ public class Attendee implements Serializable {
         this.email = email;
         this.schedule = new Schedule();  // Initialize the schedule
         this.attendedSessions = new HashSet<>();  // Initialize the attended sessions set
+        this.currentSession = null;  // Initially, no current session
     }
 
     // Getters and setters
@@ -39,6 +41,17 @@ public class Attendee implements Serializable {
 
     public Schedule getSchedule() {
         return schedule; // Returns the personalized schedule
+    }
+
+    // Set the current session the attendee is attending
+    public void setCurrentSession(Session session) {
+        this.currentSession = session;
+        System.out.println("Current session set to: " + session.getSessionName());
+    }
+
+    // Get the current session the attendee is attending
+    public Session getCurrentSession() {
+        return currentSession;  // Returns the current session
     }
 
     // Method to mark an attendee's attendance for a session

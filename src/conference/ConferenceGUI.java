@@ -12,9 +12,8 @@ import java.util.List;
 
 public class ConferenceGUI extends Application {
 
-    Conference conference = new Conference("Conference Name", "2024-01-01", "2024-01-02");
-
-
+    // Load the conference object containing sessions, speakers, and attendees
+    Conference conference = FileUtils.loadConferenceData();
 
     // Observable list to store sessions, speakers, and attendees
     private ObservableList<Session> sessions = FXCollections.observableArrayList();
@@ -22,40 +21,44 @@ public class ConferenceGUI extends Application {
     private ObservableList<Attendee> attendees = FXCollections.observableArrayList();
     private ListView<Session> scheduleListView;
 
-
     @Override
     public void start(Stage primaryStage) {
         // Load data at the start of the application
-        Conference conference = FileUtils.loadConferenceData();
-        // Now the conference object has the sessions, attendees, and feedback loaded
+        if (conference != null) {
+            sessions.addAll(conference.getListOfSessions());
+            speakers.addAll(conference.getListOfSpeakers());
+            attendees.addAll(conference.getListOfAttendees());
+        } else {
+            showAlert("Error", "Conference data could not be loaded.");
+        }
 
-        // Set up the GUI as usual...
+        // Start with the login page
+        openLoginPage(primaryStage);
     }
 
-    // Before the app closes, save the data to files
-    // Before the app closes, save the data to files
+    // Save data before closing the application
     private void saveDataBeforeClosing() {
         if (conference != null) {
             FileUtils.saveConferenceData(conference); // Save the loaded conference data to files
         }
     }
 
-
-// To call this, you might want to add a shutdown hook or call it explicitly before closing the window
-
+    @Override
+    public void stop() {
+        saveDataBeforeClosing();  // Save data when the application is closed
+    }
 
     // Method to open the login page
     private void openLoginPage(Stage primaryStage) {
         GridPane layout = new GridPane();
-        layout.setHgap(10);  // Horizontal gap between columns
-        layout.setVgap(15);  // Vertical gap between rows
-        layout.setPadding(new javafx.geometry.Insets(20)); // Add padding for better layout
+        layout.setHgap(10);
+        layout.setVgap(15);
+        layout.setPadding(new javafx.geometry.Insets(20));
 
         Label label = new Label("Please login:");
-        GridPane.setConstraints(label, 0, 0, 2, 1);  // Span over two columns for alignment
+        GridPane.setConstraints(label, 0, 0, 2, 1);
         layout.getChildren().add(label);
 
-        // Labels and TextFields for Name and Email
         Label nameLabel = new Label("Name:");
         TextField nameField = new TextField();
         GridPane.setConstraints(nameLabel, 0, 1);
@@ -68,139 +71,108 @@ public class ConferenceGUI extends Application {
         GridPane.setConstraints(emailField, 1, 2);
         layout.getChildren().addAll(emailLabel, emailField);
 
-        // Button to login as Attendee
+        // Login as Attendee
         Button loginAsAttendeeButton = new Button("Login as Attendee");
         loginAsAttendeeButton.setOnAction(e -> {
             String name = nameField.getText();
             String email = emailField.getText();
-
-            // Basic validation
             if (name.isEmpty() || email.isEmpty()) {
                 showAlert("Error", "Name and Email are required!");
             } else {
-                // Create new Attendee and set details
                 Attendee newAttendee = new Attendee(name, email);
-                newAttendee.setAttendeeID("A" + (attendees.size() + 1));  // Generate a unique ID for the attendee
-                attendees.add(newAttendee);  // Add to attendees list
-
-                // Navigate to Attendee Dashboard
-                openAttendeePage(primaryStage, newAttendee); // Open Attendee Dashboard
+                newAttendee.setAttendeeID("A" + (attendees.size() + 1));
+                attendees.add(newAttendee);
+                openAttendeePage(primaryStage, newAttendee);
             }
         });
-        GridPane.setConstraints(loginAsAttendeeButton, 0, 3, 2, 1); // Span both columns for centering
+        GridPane.setConstraints(loginAsAttendeeButton, 0, 3, 2, 1);
         layout.getChildren().add(loginAsAttendeeButton);
 
-        // Button to login as Speaker
+        // Login as Speaker
         Button loginAsSpeakerButton = new Button("Login as Speaker");
         loginAsSpeakerButton.setOnAction(e -> {
             String name = nameField.getText();
             String email = emailField.getText();
-
-            // Basic validation
             if (name.isEmpty() || email.isEmpty()) {
                 showAlert("Error", "Name and Email are required!");
             } else {
-                // Create new Speaker and set details
                 Speaker newSpeaker = new Speaker("S" + (speakers.size() + 1), name, email);
-                speakers.add(newSpeaker);  // Add to speakers list
-
-                // Navigate to Speaker Dashboard
-                openSpeakerPage(primaryStage, newSpeaker); // Open Speaker Dashboard
+                speakers.add(newSpeaker);
+                openSpeakerPage(primaryStage, newSpeaker);
             }
         });
-        GridPane.setConstraints(loginAsSpeakerButton, 0, 4, 2, 1); // Span both columns for centering
+        GridPane.setConstraints(loginAsSpeakerButton, 0, 4, 2, 1);
         layout.getChildren().add(loginAsSpeakerButton);
 
-        // Set the scene for login page
-        Scene scene = new Scene(layout, 300, 250);  // Increased height for better button visibility
+        Scene scene = new Scene(layout, 300, 250);
         primaryStage.setTitle("Login Page");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-
-
-
-
-    // Method to open the Attendee Dashboard after login
     private void openAttendeePage(Stage primaryStage, Attendee attendee) {
         VBox layout = new VBox(10);
         Label label = new Label("Attendee Dashboard");
 
-        // Button to view and manage the attendee's schedule
         Button viewScheduleButton = new Button("View Schedule");
-        viewScheduleButton.setOnAction(e -> showAttendeeSchedule(attendee, primaryStage));  // Show attendee's schedule
+        viewScheduleButton.setOnAction(e -> showAttendeeSchedule(attendee, primaryStage));
         layout.getChildren().add(viewScheduleButton);
 
-        // Button to view available sessions
         Button viewSessionsButton = new Button("View Available Sessions");
-        viewSessionsButton.setOnAction(e -> showSessionsList(primaryStage)); // Show available sessions
+        viewSessionsButton.setOnAction(e -> showSessionsList(primaryStage));
         layout.getChildren().add(viewSessionsButton);
 
-        // Back button to go back to login page
         Button backButton = new Button("Back");
-        backButton.setOnAction(e -> openLoginPage(primaryStage));  // Navigate back to the login page
+        backButton.setOnAction(e -> openLoginPage(primaryStage));
         layout.getChildren().add(backButton);
 
-        // Set the scene for the Attendee Dashboard
         Scene scene = new Scene(layout, 300, 250);
         primaryStage.setTitle("Attendee Dashboard");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    // Method to open the Speaker Dashboard after login
     private void openSpeakerPage(Stage primaryStage, Speaker speaker) {
         VBox layout = new VBox(10);
         Label label = new Label("Speaker Dashboard");
 
-        // Button to add a session
         Button addSessionButton = new Button("Add Session");
-        addSessionButton.setOnAction(e -> openAddSessionForm(primaryStage)); // Open the form to add a new session
+        addSessionButton.setOnAction(e -> openAddSessionForm(primaryStage));
         layout.getChildren().add(addSessionButton);
 
-        // Button to view the sessions assigned to the speaker
         Button viewSessionsButton = new Button("View My Sessions");
-        viewSessionsButton.setOnAction(e -> showSpeakerSessions(primaryStage, speaker)); // Show the speaker's assigned sessions
+        viewSessionsButton.setOnAction(e -> showSpeakerSessions(primaryStage, speaker));
         layout.getChildren().add(viewSessionsButton);
 
-        // Back button to go back to login page
         Button backButton = new Button("Back");
-        backButton.setOnAction(e -> openLoginPage(primaryStage)); // Navigate back to the login page
+        backButton.setOnAction(e -> openLoginPage(primaryStage));
         layout.getChildren().add(backButton);
 
-        // Set the scene for the Speaker Dashboard
         Scene scene = new Scene(layout, 300, 250);
         primaryStage.setTitle("Speaker Dashboard");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    // Method to show an attendee's schedule after registration
     private void showAttendeeSchedule(Attendee attendee, Stage primaryStage) {
         VBox layout = new VBox(10);
         Label label = new Label(attendee.getName() + "'s Schedule:");
 
-        // ListView to display the attendee's schedule (sessions)
-        ListView<Session> scheduleListView = new ListView<>(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+        scheduleListView = new ListView<>(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
         layout.getChildren().addAll(label, scheduleListView);
 
-        // Button to add a session to the schedule
         Button addSessionButton = new Button("Add Session");
-        addSessionButton.setOnAction(e -> addSessionToAttendeeSchedule(attendee, scheduleListView)); // Add session functionality
+        addSessionButton.setOnAction(e -> addSessionToAttendeeSchedule(attendee, scheduleListView));
         layout.getChildren().add(addSessionButton);
 
-        // Button to remove a session from the schedule
         Button removeSessionButton = new Button("Remove Session");
-        removeSessionButton.setOnAction(e -> removeSessionFromAttendeeSchedule(attendee, scheduleListView)); // Remove session functionality
+        removeSessionButton.setOnAction(e -> removeSessionFromAttendeeSchedule(attendee, scheduleListView));
         layout.getChildren().add(removeSessionButton);
 
-        // Button to submit feedback for a session
         Button submitFeedbackButton = new Button("Submit Feedback");
-        submitFeedbackButton.setOnAction(e -> openFeedbackForm(attendee, primaryStage)); // Open feedback form
+        submitFeedbackButton.setOnAction(e -> openFeedbackForm(attendee, primaryStage));
         layout.getChildren().add(submitFeedbackButton);
 
-        // Show the attendee schedule in a new window
         Scene scene = new Scene(layout, 400, 300);
         Stage scheduleStage = new Stage();
         scheduleStage.setTitle("Schedule for " + attendee.getName());
@@ -208,131 +180,17 @@ public class ConferenceGUI extends Application {
         scheduleStage.show();
     }
 
-    private void showAttendanceReport(Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Session Attendance Report");
-
-        // Create a ListView to display sessions and number of attendees
-        ListView<String> reportListView = new ListView<>();
-
-        // Get the list of sessions from the Conference instance
-        List<Session> sessionList = conference.getListOfSessions();;  // Assuming getListOfSessions() returns the list of sessions
-
-        for (Session session : sessionList) {
-            int numOfAttendees = session.getAttendeesList().size();
-            reportListView.getItems().add("Session: " + session.getSessionName() + " | Attendees: " + numOfAttendees);
-        }
-
-        layout.getChildren().addAll(label, reportListView);
-
-        // Button to close the report window
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> primaryStage.close());
-        layout.getChildren().add(closeButton);
-
-        Scene scene = new Scene(layout, 400, 300);
-        Stage reportStage = new Stage();
-        reportStage.setTitle("Attendance Report");
-        reportStage.setScene(scene);
-        reportStage.show();
-    }
-
-
-
-    // Method to open the feedback form for the attendee
-    // In the Attendee Dashboard, where attendees can submit feedback
-    private void openFeedbackForm(Attendee attendee, Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Submit Feedback");
-
-        // TextField for the rating (1 to 5)
-        Label ratingLabel = new Label("Rating (1-5):");
-        TextField ratingField = new TextField();
-        layout.getChildren().addAll(ratingLabel, ratingField);
-
-        // TextArea for the comment
-        Label commentLabel = new Label("Comment:");
-        TextArea commentArea = new TextArea();
-        layout.getChildren().addAll(commentLabel, commentArea);
-
-        // Button to submit feedback
-        Button submitButton = new Button("Submit Feedback");
-        submitButton.setOnAction(e -> {
-            // Get the selected session from the attendee's schedule
-            Session selectedSession = scheduleListView.getSelectionModel().getSelectedItem();
-
-            if (selectedSession != null) {
-                // Get the rating and comment from the input fields
-                int rating = Integer.parseInt(ratingField.getText()); // Ensure it’s a valid integer
-                String comment = commentArea.getText(); // Get the comment text
-
-                // Submit feedback to the selected session
-                attendee.submitFeedback(selectedSession, comment, rating);
-
-                // Show a success message
-                showAlert("Feedback Submitted", "Your feedback has been successfully submitted.");
-
-                // Close the feedback form
-                ((Stage) layout.getScene().getWindow()).close();
-            } else {
-                // Handle the case where no session was selected
-                showAlert("Error", "Please select a session first.");
-            }
-        });
-
-        layout.getChildren().add(submitButton);
-
-        // Create a new scene for the feedback form
-        Scene scene = new Scene(layout, 300, 250);
-        Stage feedbackStage = new Stage();
-        feedbackStage.setTitle("Feedback Form");
-        feedbackStage.setScene(scene);
-        feedbackStage.show();
-    }
-
-    // Collect feedback when an attendee selects a session
-    private void collectFeedbackForSession(Attendee attendee, Session session, String comment, int rating) {
-        // Call the collectFeedback() method on the session
-        session.collectFeedback(attendee, comment, rating);
-    }
-
-
-
-
-    // Method to add a session to an attendee's schedule
-    private void addSessionToAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
-        if (!sessions.isEmpty()) {
-            attendee.addSessionToSchedule(sessions.get(0)); // Just adding the first session for now
-
-            // Update the ListView to reflect the new schedule
-            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
-        }
-    }
-
-    // Method to remove a session from an attendee's schedule
-    private void removeSessionFromAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
-        if (!attendee.getSchedule().getSessionsList().isEmpty()) {
-            attendee.getSchedule().removeSession(attendee.getSchedule().getSessionsList().get(0)); // Removing the first session for demo
-
-            // Update the ListView to reflect the new schedule
-            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
-        }
-    }
-
-    // Method to show all available sessions
     private void showSessionsList(Stage primaryStage) {
         VBox layout = new VBox(10);
         Label label = new Label("Available Sessions");
 
-        // ListView to display sessions
         ListView<Session> sessionListView = new ListView<>(sessions);
         sessionListView.setItems(sessions);
 
-        // Button to close the session list
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> {
-            Stage sessionStage = (Stage) closeButton.getScene().getWindow(); // Get the current window (child stage)
-            sessionStage.close(); // Close the current window
+            Stage sessionStage = (Stage) closeButton.getScene().getWindow();
+            sessionStage.close();
         });
         layout.getChildren().addAll(label, sessionListView, closeButton);
 
@@ -343,61 +201,10 @@ public class ConferenceGUI extends Application {
         sessionStage.show();
     }
 
-
-    // Method to show the sessions assigned to a speaker
-    private void showSpeakerSessions(Stage primaryStage, Speaker speaker) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Speaker's Sessions:");
-
-        // Create a list view to show the sessions assigned to the speaker
-        ListView<Session> speakerSessionsListView = new ListView<>();
-        speakerSessionsListView.setItems(FXCollections.observableArrayList(speaker.getSessions()));
-
-        // Add a button to view feedback for each session
-        Button viewFeedbackButton = new Button("View Feedback");
-        viewFeedbackButton.setOnAction(e -> openSessionFeedbackForm(primaryStage, speakerSessionsListView.getSelectionModel().getSelectedItem()));
-        layout.getChildren().addAll(label, speakerSessionsListView, viewFeedbackButton);
-
-        // Close button
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> primaryStage.close());
-        layout.getChildren().add(closeButton);
-
-        Scene scene = new Scene(layout, 400, 300);
-        Stage sessionStage = new Stage();
-        sessionStage.setTitle("Speaker's Sessions");
-        sessionStage.setScene(scene);
-        sessionStage.show();
-    }
-
-    // Method to view feedback for a selected session
-    private void openSessionFeedbackForm(Stage primaryStage, Session session) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Feedback for Session: " + session.getSessionName());
-
-        // ListView to display all feedback for the session
-        ListView<Feedback> feedbackListView = new ListView<>(FXCollections.observableArrayList(session.getFeedbackList()));
-        layout.getChildren().addAll(label, feedbackListView);
-
-        // Close button
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> primaryStage.close());
-        layout.getChildren().add(closeButton);
-
-        Scene scene = new Scene(layout, 400, 300);
-        Stage feedbackStage = new Stage();
-        feedbackStage.setTitle("Session Feedback");
-        feedbackStage.setScene(scene);
-        feedbackStage.show();
-    }
-
-
-    // Method to open the form to add a session (Speaker Dashboard)
     private void openAddSessionForm(Stage primaryStage) {
         VBox layout = new VBox(10);
         Label label = new Label("Add Session");
 
-        // TextFields for session details
         Label nameLabel = new Label("Session Name:");
         TextField nameField = new TextField();
         Label dateLabel = new Label("Session Date:");
@@ -413,33 +220,121 @@ public class ConferenceGUI extends Application {
             String sessionDate = dateField.getText();
             String sessionTime = timeField.getText();
             String sessionRoom = roomField.getText();
-
-            // Basic validation
             if (sessionName.isEmpty() || sessionDate.isEmpty() || sessionTime.isEmpty() || sessionRoom.isEmpty()) {
-                showAlert("Error", "All fields are required!");
+                showAlert("Error", "All fields are required.");
             } else {
-                // Create a new session and add it to the list
                 Session newSession = new Session(sessionName, sessionDate, sessionTime, sessionRoom, sessions.size());
                 sessions.add(newSession);
-
-                // Notify speaker of session creation
+                conference.addSession(newSession);
                 showAlert("Success", "Session added successfully!");
-                ((Stage) layout.getScene().getWindow()).close(); // Close the add session form
             }
         });
 
-        layout.getChildren().addAll(label, nameLabel, nameField, dateLabel, dateField, timeLabel, timeField, roomLabel, roomField, addSessionButton);
+        layout.getChildren().addAll(nameLabel, nameField, dateLabel, dateField, timeLabel, timeField, roomLabel, roomField, addSessionButton);
 
-        Scene scene = new Scene(layout, 400, 300);
+        Scene scene = new Scene(layout, 300, 300);
         Stage addSessionStage = new Stage();
         addSessionStage.setTitle("Add Session");
         addSessionStage.setScene(scene);
         addSessionStage.show();
     }
 
-    // Method to show an alert (Error messages, etc.)
+    private void showSpeakerSessions(Stage primaryStage, Speaker speaker) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Sessions of " + speaker.getName());
+
+        // Explicitly specify the type parameter <Session>
+        ListView<Session> speakerSessionsListView = new ListView<>();
+
+        // Assuming speaker.getSessions() returns a List<Session>, you can set the items for the ListView
+        speakerSessionsListView.getItems().setAll(speaker.getSessions());
+
+        layout.getChildren().addAll(label, speakerSessionsListView);
+
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> {
+            Stage sessionStage = (Stage) closeButton.getScene().getWindow();
+            sessionStage.close();
+        });
+        layout.getChildren().add(closeButton);
+
+        Scene scene = new Scene(layout, 400, 300);
+        Stage sessionStage = new Stage();
+        sessionStage.setTitle("Speaker Sessions");
+        sessionStage.setScene(scene);
+        sessionStage.show();
+    }
+
+
+    private void addSessionToAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
+        // Logic to add a session to the attendee's schedule
+        Session selectedSession = scheduleListView.getSelectionModel().getSelectedItem();
+        if (selectedSession != null && !attendee.getSchedule().getSessionsList().contains(selectedSession)) {
+            attendee.getSchedule().addSession(selectedSession);
+            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+        } else {
+            showAlert("Error", "This session is already added.");
+        }
+    }
+
+    private void removeSessionFromAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
+        // Logic to remove a session from the attendee's schedule
+        Session selectedSession = scheduleListView.getSelectionModel().getSelectedItem();
+        if (selectedSession != null) {
+            attendee.getSchedule().removeSession(selectedSession);
+            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+        } else {
+            showAlert("Error", "Please select a session to remove.");
+        }
+    }
+
+    private void openFeedbackForm(Attendee attendee, Stage primaryStage) {
+        VBox layout = new VBox(10);
+        Label label = new Label("Provide Feedback");
+
+        // Text area for feedback input
+        TextArea feedbackArea = new TextArea();
+        feedbackArea.setPromptText("Write your feedback...");
+
+        // Rating system (optional, add a simple integer scale from 1 to 5)
+        Label ratingLabel = new Label("Rate the session:");
+        ComboBox<Integer> ratingComboBox = new ComboBox<>();
+        ratingComboBox.getItems().addAll(1, 2, 3, 4, 5); // Rating options 1 to 5
+        ratingComboBox.setValue(5); // Default rating is 5
+
+        Button submitFeedbackButton = new Button("Submit Feedback");
+        submitFeedbackButton.setOnAction(e -> {
+            String feedbackText = feedbackArea.getText();
+            Integer rating = ratingComboBox.getValue();  // Get the selected rating
+
+            if (feedbackText.isEmpty()) {
+                showAlert("Error", "Feedback cannot be empty.");
+            } else if (rating == null) {
+                showAlert("Error", "Please select a rating.");
+            } else {
+                // Save the feedback for the current session
+                Session currentSession = attendee.getCurrentSession();  // Get the current session the attendee is attending
+
+                // Submit feedback using the Attendee class method
+                attendee.submitFeedback(currentSession, feedbackText, rating);
+
+                showAlert("Success", "Feedback submitted successfully!");
+                primaryStage.close();  // Close the feedback window after submission
+            }
+        });
+
+        layout.getChildren().addAll(label, feedbackArea, ratingLabel, ratingComboBox, submitFeedbackButton);
+
+        Scene scene = new Scene(layout, 400, 250);
+        Stage feedbackStage = new Stage();
+        feedbackStage.setTitle("Feedback");
+        feedbackStage.setScene(scene);
+        feedbackStage.show();
+    }
+
+
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
@@ -447,6 +342,6 @@ public class ConferenceGUI extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args); // Launch the JavaFX application
+        launch(args);
     }
 }

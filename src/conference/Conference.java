@@ -1,9 +1,12 @@
 package conference;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Conference {
+public class Conference implements Serializable {
+    private static final long serialVersionUID = 1L;  // Added for serialVersionUID
+
     private String conferenceName;
     private String startDate;
     private String endDate;
@@ -23,6 +26,18 @@ public class Conference {
         this.listOfSessions = new ArrayList<>();
     }
 
+    // Add a new session to the conference
+    public void addSession(Session session) {
+        if (listOfSessions.contains(session)) {
+            System.out.println("Session is already added.");
+        } else {
+            session.setSessionID("S" + (listOfSessions.size() + 1));
+            listOfSessions.add(session);
+            System.out.println("Session " + session.getSessionName() + " added with ID: " + session.getSessionID());
+            notifyAllAttendees("New session added: " + session.getSessionName() + " on " + session.getSessionDate() + " at " + session.getTime());
+        }
+    }
+
     // Register an attendee
     public void registerAttendee(Attendee attendee) {
         attendee.setAttendeeID("A" + (listOfAttendees.size() + 1));
@@ -32,14 +47,7 @@ public class Conference {
 
     // Open a new session
     public void openNewSession(Session session) {
-        if (listOfSessions.contains(session)) {
-            System.out.println("Session is already added.");
-            return;
-        }
-        session.setSessionID("S" + (listOfSessions.size() + 1));
-        listOfSessions.add(session);
-        System.out.println("Session " + session.getSessionName() + " added with ID: " + session.getSessionID());
-        notifyAllAttendees("New session added: " + session.getSessionName() + " on " + session.getSessionDate() + " at " + session.getTime());
+        addSession(session); // Now using the addSession method
     }
 
     // Assign a speaker to a session
@@ -49,8 +57,14 @@ public class Conference {
         System.out.println(speaker.getName() + " assigned to session: " + session.getSessionName());
     }
 
+    // Add a speaker to the conference
     public void addSpeaker(Speaker speaker) {
         listOfSpeakers.add(speaker);
+    }
+
+    // Getter for list of speakers
+    public List<Speaker> getListOfSpeakers() {
+        return listOfSpeakers;
     }
 
     // List all speakers and their sessions
@@ -107,8 +121,6 @@ public class Conference {
 
         System.out.println("Feedback collected: " + feedback);
     }
-
-
 
     // Get all feedbacks for a particular session
     public List<Feedback> getFeedbackForSession(String sessionID) {
@@ -170,6 +182,22 @@ public class Conference {
             }
             double avgRating = calculateAverageRatingForSession(sessionID);
             System.out.println("Average Rating: " + avgRating);
+        }
+    }
+
+    public void generateFeedbackReport() {
+        System.out.println("Session Feedback Report:");
+        for (Session session : listOfSessions) {
+            double averageRating = calculateAverageRatingForSession(session.getSessionID());
+            System.out.println("Session: " + session.getSessionName());
+            System.out.println("Average Rating: " + averageRating);
+            System.out.println("Feedback: ");
+
+            for (Feedback feedback : session.getFeedbackList()) {
+                System.out.println(" - Attendee ID: " + feedback.getAttendeeID());
+                System.out.println("   Rating: " + feedback.getRating());
+                System.out.println("   Comment: " + feedback.getComment());
+            }
         }
     }
 
