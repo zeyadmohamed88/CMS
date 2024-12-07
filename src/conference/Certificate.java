@@ -1,5 +1,7 @@
 package conference;
 
+import javax.swing.*;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -43,20 +45,24 @@ public class Certificate {
     }
 
     // Method to generate a certificate
-    public void generateCertificate() {
-        String content = "Certificate of Attendance\n"
-                + "-------------------------\n"
-                + "Certificate ID: " + certificateID + "\n"
-                + "Attendee ID: " + attendeeID + "\n"
-                + "Conference: " + conferenceName + "\n"
-                + "Issued On: " + issueDate + "\n";
+    public void generateCertificate(Attendee attendee, Session session) {
+        String certificateText = "Certificate of Attendance\n\n";
+        certificateText += "This is to certify that " + attendee.getName() + "\n";
+        certificateText += "has attended the session: " + session.getSessionName() + "\n";
+        certificateText += "Thank you for attending!\n";
+        certificateText += "Date: " + java.time.LocalDate.now().toString();
 
-        // Write certificate to a text file
-        try (FileWriter writer = new FileWriter("Certificate_" + attendeeID + ".txt")) {
-            writer.write(content);
-            System.out.println("Certificate generated for Attendee ID: " + attendeeID);
+        // Generate a simple text file as certificate for now
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Certificates/" + attendee.getAttendeeID() + "_" + session.getSessionID() + ".txt"))) {
+            writer.write(certificateText);
+            System.out.println("Certificate generated for " + attendee.getName());
         } catch (IOException e) {
-            System.err.println("Error generating certificate: " + e.getMessage());
+            showAlert("Error", "Error generating certificate: " + e.getMessage());
         }
     }
+
+    private void showAlert(String title, String message) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+
 }

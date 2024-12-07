@@ -7,23 +7,19 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.util.List;
 
 public class ConferenceGUI extends Application {
 
-    // Load the conference object containing sessions, speakers, and attendees
     Conference conference = FileUtils.loadConferenceData();
-
-    // Observable list to store sessions, speakers, and attendees
     private ObservableList<Session> sessions = FXCollections.observableArrayList();
     private ObservableList<Speaker> speakers = FXCollections.observableArrayList();
     private ObservableList<Attendee> attendees = FXCollections.observableArrayList();
     private ListView<Session> scheduleListView;
+    private Attendee currentAttendee;
 
     @Override
     public void start(Stage primaryStage) {
-        // Load data at the start of the application
         if (conference != null) {
             sessions.addAll(conference.getListOfSessions());
             speakers.addAll(conference.getListOfSpeakers());
@@ -32,23 +28,20 @@ public class ConferenceGUI extends Application {
             showAlert("Error", "Conference data could not be loaded.");
         }
 
-        // Start with the login page
         openLoginPage(primaryStage);
     }
 
-    // Save data before closing the application
     private void saveDataBeforeClosing() {
         if (conference != null) {
-            FileUtils.saveConferenceData(conference); // Save the loaded conference data to files
+            FileUtils.saveConferenceData(conference);
         }
     }
 
     @Override
     public void stop() {
-        saveDataBeforeClosing();  // Save data when the application is closed
+        saveDataBeforeClosing();
     }
 
-    // Method to open the login page
     private void openLoginPage(Stage primaryStage) {
         GridPane layout = new GridPane();
         layout.setHgap(10);
@@ -71,7 +64,6 @@ public class ConferenceGUI extends Application {
         GridPane.setConstraints(emailField, 1, 2);
         layout.getChildren().addAll(emailLabel, emailField);
 
-        // Login as Attendee
         Button loginAsAttendeeButton = new Button("Login as Attendee");
         loginAsAttendeeButton.setOnAction(e -> {
             String name = nameField.getText();
@@ -82,13 +74,13 @@ public class ConferenceGUI extends Application {
                 Attendee newAttendee = new Attendee(name, email);
                 newAttendee.setAttendeeID("A" + (attendees.size() + 1));
                 attendees.add(newAttendee);
+                currentAttendee = newAttendee;
                 openAttendeePage(primaryStage, newAttendee);
             }
         });
         GridPane.setConstraints(loginAsAttendeeButton, 0, 3, 2, 1);
         layout.getChildren().add(loginAsAttendeeButton);
 
-        // Login as Speaker
         Button loginAsSpeakerButton = new Button("Login as Speaker");
         loginAsSpeakerButton.setOnAction(e -> {
             String name = nameField.getText();
@@ -96,7 +88,8 @@ public class ConferenceGUI extends Application {
             if (name.isEmpty() || email.isEmpty()) {
                 showAlert("Error", "Name and Email are required!");
             } else {
-                Speaker newSpeaker = new Speaker("S" + (speakers.size() + 1), name, email);
+                String bio = "";  // You can leave it empty or have default text
+                Speaker newSpeaker = new Speaker("S" + (speakers.size() + 1), name, bio, email);
                 speakers.add(newSpeaker);
                 openSpeakerPage(primaryStage, newSpeaker);
             }
@@ -161,17 +154,9 @@ public class ConferenceGUI extends Application {
         scheduleListView = new ListView<>(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
         layout.getChildren().addAll(label, scheduleListView);
 
-        Button addSessionButton = new Button("Add Session");
-        addSessionButton.setOnAction(e -> addSessionToAttendeeSchedule(attendee, scheduleListView));
-        layout.getChildren().add(addSessionButton);
-
-        Button removeSessionButton = new Button("Remove Session");
-        removeSessionButton.setOnAction(e -> removeSessionFromAttendeeSchedule(attendee, scheduleListView));
-        layout.getChildren().add(removeSessionButton);
-
-        Button submitFeedbackButton = new Button("Submit Feedback");
-        submitFeedbackButton.setOnAction(e -> openFeedbackForm(attendee, primaryStage));
-        layout.getChildren().add(submitFeedbackButton);
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> openAttendeePage(primaryStage, attendee));
+        layout.getChildren().add(backButton);
 
         Scene scene = new Scene(layout, 400, 300);
         Stage scheduleStage = new Stage();
@@ -187,12 +172,33 @@ public class ConferenceGUI extends Application {
         ListView<Session> sessionListView = new ListView<>(sessions);
         sessionListView.setItems(sessions);
 
+        Button addSessionButton = new Button("Add Session");
+        addSessionButton.setOnAction(e -> {
+            Session selectedSession = sessionListView.getSelectionModel().getSelectedItem();
+            if (selectedSession != null) {
+                addSessionToAttendeeSchedule(currentAttendee, sessionListView);
+            } else {
+                showAlert("Error", "Please select a session to add.");
+            }
+        });
+
+        Button removeSessionButton = new Button("Remove Session");
+        removeSessionButton.setOnAction(e -> {
+            Session selectedSession = sessionListView.getSelectionModel().getSelectedItem();
+            if (selectedSession != null) {
+                removeSessionFromAttendeeSchedule(currentAttendee, sessionListView);
+            } else {
+                showAlert("Error", "Please select a session to remove.");
+            }
+        });
+
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> {
             Stage sessionStage = (Stage) closeButton.getScene().getWindow();
             sessionStage.close();
         });
-        layout.getChildren().addAll(label, sessionListView, closeButton);
+
+        layout.getChildren().addAll(label, sessionListView, addSessionButton, removeSessionButton, closeButton);
 
         Scene scene = new Scene(layout, 400, 300);
         Stage sessionStage = new Stage();
@@ -243,7 +249,6 @@ public class ConferenceGUI extends Application {
         VBox layout = new VBox(10);
         Label label = new Label("Sessions of " + speaker.getName());
 
-        // ListView to display sessions the speaker has
         ListView<Session> speakerSessionsListView = new ListView<>();
         speakerSessionsListView.getItems().setAll(speaker.getSessions());
 
@@ -251,8 +256,7 @@ public class ConferenceGUI extends Application {
         generateCertificatesButton.setOnAction(e -> {
             Session selectedSession = speakerSessionsListView.getSelectionModel().getSelectedItem();
             if (selectedSession != null) {
-                // Generate certificates for attendees of the selected session
-                List<Attendee> attendeesOfSession = selectedSession.getAttendees();  // Assuming Session has a method to get attendees
+                List<Attendee> attendeesOfSession = selectedSession.getAttendees();
 
                 if (attendeesOfSession.isEmpty()) {
                     showAlert("Error", "No attendees found for this session.");
@@ -260,14 +264,14 @@ public class ConferenceGUI extends Application {
                 }
 
                 for (Attendee attendee : attendeesOfSession) {
-                    // Create a Certificate for each attendee
                     Certificate certificate = new Certificate();
                     certificate.setCertificateID("C" + (attendeesOfSession.indexOf(attendee) + 1));
                     certificate.setAttendeeID(attendee.getAttendeeID());
-                    certificate.setConferenceName("Sample Conference");  // You can replace this with the actual conference nam
-                    certificate.setIssueDate(java.time.LocalDate.now().toString());  // Issue date as current date
+                    certificate.setConferenceName("Sample Conference");
+                    certificate.setIssueDate(java.time.LocalDate.now().toString());
+                    Session session = new Session("AI and Machine Learning", "2025-01-01", "10:00 AM", "Room 101", 5);
+                    certificate.generateCertificate(attendee, session);
 
-                    certificate.generateCertificate();
                 }
 
                 showAlert("Success", "Certificates generated for all attendees of the session.");
@@ -292,75 +296,74 @@ public class ConferenceGUI extends Application {
         sessionStage.show();
     }
 
-
-
-
-    private void addSessionToAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
-        // Logic to add a session to the attendee's schedule
-        Session selectedSession = scheduleListView.getSelectionModel().getSelectedItem();
+    private void addSessionToAttendeeSchedule(Attendee attendee, ListView<Session> sessionListView) {
+        Session selectedSession = sessionListView.getSelectionModel().getSelectedItem();
         if (selectedSession != null && !attendee.getSchedule().getSessionsList().contains(selectedSession)) {
             attendee.getSchedule().addSession(selectedSession);
-            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+
+            // Check eligibility for certificate
+            if (attendee.getSchedule().getSessionsList().contains(selectedSession)) {
+                showAlert("Success", "You are now eligible for a certificate for this session!");
+            }
         } else {
             showAlert("Error", "This session is already added.");
         }
     }
 
-    private void removeSessionFromAttendeeSchedule(Attendee attendee, ListView<Session> scheduleListView) {
-        // Logic to remove a session from the attendee's schedule
-        Session selectedSession = scheduleListView.getSelectionModel().getSelectedItem();
+
+    private void removeSessionFromAttendeeSchedule(Attendee attendee, ListView<Session> sessionListView) {
+        Session selectedSession = sessionListView.getSelectionModel().getSelectedItem();
         if (selectedSession != null) {
             attendee.getSchedule().removeSession(selectedSession);
-            scheduleListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
+            sessionListView.setItems(FXCollections.observableArrayList(attendee.getSchedule().getSessionsList()));
         } else {
             showAlert("Error", "Please select a session to remove.");
         }
     }
 
-    private void openFeedbackForm(Attendee attendee, Stage primaryStage) {
-        VBox layout = new VBox(10);
-        Label label = new Label("Provide Feedback");
-
-        // Text area for feedback input
-        TextArea feedbackArea = new TextArea();
-        feedbackArea.setPromptText("Write your feedback...");
-
-        // Rating system (optional, add a simple integer scale from 1 to 5)
-        Label ratingLabel = new Label("Rate the session:");
-        ComboBox<Integer> ratingComboBox = new ComboBox<>();
-        ratingComboBox.getItems().addAll(1, 2, 3, 4, 5); // Rating options 1 to 5
-        ratingComboBox.setValue(5); // Default rating is 5
-
-        Button submitFeedbackButton = new Button("Submit Feedback");
-        submitFeedbackButton.setOnAction(e -> {
-            String feedbackText = feedbackArea.getText();
-            Integer rating = ratingComboBox.getValue();  // Get the selected rating
-
-            if (feedbackText.isEmpty()) {
-                showAlert("Error", "Feedback cannot be empty.");
-            } else if (rating == null) {
-                showAlert("Error", "Please select a rating.");
-            } else {
-                // Save the feedback for the current session
-                Session currentSession = attendee.getCurrentSession();  // Get the current session the attendee is attending
-
-                // Submit feedback using the Attendee class method
-                attendee.submitFeedback(currentSession, feedbackText, rating);
-
-                showAlert("Success", "Feedback submitted successfully!");
-                primaryStage.close();  // Close the feedback window after submission
+    private boolean isEmailUnique(String email) {
+        for (Attendee attendee : attendees) {
+            if (attendee.getEmail().equals(email)) {
+                return false;
             }
-        });
-
-        layout.getChildren().addAll(label, feedbackArea, ratingLabel, ratingComboBox, submitFeedbackButton);
-
-        Scene scene = new Scene(layout, 400, 250);
-        Stage feedbackStage = new Stage();
-        feedbackStage.setTitle("Feedback");
-        feedbackStage.setScene(scene);
-        feedbackStage.show();
+        }
+        for (Speaker speaker : speakers) {
+            if (speaker.getEmail().equals(email)) {
+                return false;
+            }
+        }
+        return true;
     }
 
+    public void handleLogin(String email, String username, String password) {
+        if (!isEmailUnique(email)) {
+            showAlert("Error", "Email already in use.");
+            return;
+        }
+
+        // Proceed with login logic: check credentials, load data, etc.
+        boolean isValidUser = authenticateUser(email, password);
+
+        if (isValidUser) {
+            // Successful login: load relevant data and transition to next screen
+            System.out.println("Login successful for: " + email);
+            // Proceed with user-specific functionality (sessions, certificates, etc.)
+        } else {
+            // Invalid credentials, show alert
+            showAlert("Error", "Invalid credentials.");
+        }
+    }
+
+    private boolean authenticateUser(String email, String password) {
+        // Here, check the credentials from your list or backend
+        // You can compare the email and password with the stored values for the respective type (attendee/speaker)
+        return true; // For simplicity, assume valid user
+    }
+
+
+    private Attendee getCurrentAttendee() {
+        return currentAttendee;
+    }
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

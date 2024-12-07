@@ -9,8 +9,8 @@ public class Main {
         List<Session> sessions = new ArrayList<>();  // Declare and initialize the sessions list
 
         // Create speakers using names from the rubric
-        Speaker speaker1 = new Speaker("S1", "Dr. Abram", "Expert in AI and Healthcare");
-        Speaker speaker2 = new Speaker("S2", "Dr. Nancy", "Specialist in Machine Learning");
+        Speaker speaker1 = new Speaker("S1", "Dr. Abram", "Expert in AI and Healthcare","nancy@gmail.com");
+        Speaker speaker2 = new Speaker("S2", "Dr. Nancy", "Specialist in Machine Learning","abram@gmail.com");
 
         // Create sessions with sessionCount passed as sessions.size()
         Session session1 = new Session("AI in Healthcare", "2025-05-10", "10:00", "Room 101", sessions.size());

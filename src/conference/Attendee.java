@@ -13,6 +13,9 @@ public class Attendee implements Serializable {
     private Set<Session> attendedSessions;  // Track sessions the attendee has attended
     private Session currentSession;  // Store the current session the attendee is attending
 
+    // Static variable to track the current attendee
+    private static Attendee currentAttendee;
+
     // Constructor
     public Attendee(String name, String email) {
         this.name = name;
@@ -100,6 +103,16 @@ public class Attendee implements Serializable {
     public void addAttendeeToSession(Session session) {
         session.getAttendees();
         System.out.println(name + " has been added to the session: " + session.getSessionName());
+    }
+
+    // Static method to set the current attendee (used for tracking logged-in attendee)
+    public static void setCurrentAttendee(Attendee attendee) {
+        currentAttendee = attendee;
+    }
+
+    // Static method to get the current attendee (used for fetching the active logged-in attendee)
+    public static Attendee getCurrentAttendee() {
+        return currentAttendee;
     }
 
     @Override

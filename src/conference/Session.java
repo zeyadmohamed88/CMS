@@ -1,11 +1,9 @@
 package conference;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Session implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Session {
 
     private String sessionID;
     private String sessionName;
@@ -25,6 +23,17 @@ public class Session implements Serializable {
         this.attendeesList = new ArrayList<>();  // Initialize the attendees list
         this.feedbackList = new ArrayList<>();   // Initialize the feedback list
         this.sessionID = "S" + (sessionCount + 1); // Generate session ID (e.g., S1, S2, ...)
+    }
+
+    // Constructor for CSV loading
+    public Session(String sessionID, String sessionName, String sessionDate, String time, String room) {
+        this.sessionID = sessionID;
+        this.sessionName = sessionName;
+        this.sessionDate = sessionDate;
+        this.time = time;
+        this.room = room;
+        this.attendeesList = new ArrayList<>();  // Initialize the attendees list
+        this.feedbackList = new ArrayList<>();   // Initialize the feedback list
     }
 
     // Getters and setters
@@ -122,6 +131,20 @@ public class Session implements Serializable {
     // New method: Get attendees (direct access method)
     public List<Attendee> getAttendees() {
         return new ArrayList<>(attendeesList);  // Return a copy of the list to avoid external modification
+    }
+
+    // Method to convert the session object to a CSV string
+    public String toCSV() {
+        return sessionID + "," + sessionName + "," + sessionDate + "," + time + "," + room;
+    }
+
+    // Static method to create a Session object from a CSV string
+    public static Session fromCSV(String csvLine) {
+        String[] fields = csvLine.split(",");
+        if (fields.length == 5) {
+            return new Session(fields[0], fields[1], fields[2], fields[3], fields[4]);
+        }
+        return null;  // Invalid CSV format
     }
 
     @Override

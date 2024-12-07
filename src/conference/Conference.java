@@ -14,6 +14,8 @@ public class Conference implements Serializable {
     private List<Attendee> listOfAttendees;
     private List<Feedback> feedbackList;
     private List<Speaker> listOfSpeakers;
+    private Attendee currentAttendee;  // Stores the current attendee
+
 
     // Constructor
     public Conference(String conferenceName, String startDate, String endDate) {
@@ -66,6 +68,18 @@ public class Conference implements Serializable {
     public List<Speaker> getListOfSpeakers() {
         return listOfSpeakers;
     }
+
+    // Setter method to set the current attendee
+    public void setCurrentAttendee(Attendee attendee) {
+        this.currentAttendee = attendee;
+        System.out.println("Current attendee set to: " + attendee.getName());
+    }
+
+    // Getter method to get the current attendee
+    public Attendee getCurrentAttendee() {
+        return this.currentAttendee;
+    }
+
 
     // List all speakers and their sessions
     public void listSpeakersAndSessions() {
@@ -232,8 +246,9 @@ public class Conference implements Serializable {
                 certificate.setCertificateID("C" + (listOfAttendees.indexOf(attendee) + 1));
                 certificate.setAttendeeID(attendee.getAttendeeID());
                 certificate.setConferenceName(this.conferenceName);
-                certificate.setIssueDate(this.endDate); // Using the end date as issue date
-                certificate.generateCertificate();  // Generate the certificate
+                certificate.setIssueDate(this.endDate);
+                Session session = new Session("AI and Machine Learning", "2025-01-01", "10:00 AM", "Room 101", 5);
+                certificate.generateCertificate(attendee,session);  // Generate the certificate
             }
         }
     }
